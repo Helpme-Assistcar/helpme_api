@@ -3,6 +3,7 @@ const DeviceToken = require("./DeviceToken");
 const DocumentType = require("./DocumentType");
 const FavoriteProvider = require("./FavoriteProvider");
 const FileUpload = require("./FileUpload");
+const RefreshToken = require("./RefreshToken");
 const Notification = require("./Notification");
 const ProviderAddress = require("./ProviderAddress");
 const ProviderDocument = require("./ProviderDocument");
@@ -23,6 +24,7 @@ module.exports = {
   DocumentType,
   FavoriteProvider,
   FileUpload,
+  RefreshToken,
   Notification,
   ProviderAddress,
   ProviderDocument,

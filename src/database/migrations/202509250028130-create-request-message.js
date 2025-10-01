@@ -1,37 +1,44 @@
-'use strict';
+"use strict";
 
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('request_message', {
+    await queryInterface.createTable("RequestMessage", {
       id: {
         type: Sequelize.UUID,
-        defaultValue: Sequelize.literal('uuid_generate_v4()'),
+        defaultValue: Sequelize.UUIDV4,
         primaryKey: true,
       },
       request_id: {
         type: Sequelize.UUID,
         allowNull: false,
-        references: { model: 'service_request', key: 'id' },
-        onDelete: 'CASCADE',
+        references: { model: "ServiceRequest", key: "id" },
+        onDelete: "CASCADE",
       },
       sender_user_id: {
         type: Sequelize.UUID,
         allowNull: false,
-        references: { model: 'users', key: 'id' },
-        onDelete: 'CASCADE',
+        references: { model: "Users", key: "id" },
+        onDelete: "CASCADE",
       },
       message: { type: Sequelize.TEXT, allowNull: true },
       attachment_file_id: {
         type: Sequelize.UUID,
         allowNull: true,
-        references: { model: 'file_upload', key: 'id' },
-        onDelete: 'SET NULL',
+        references: { model: "FileUpload", key: "id" },
+        onDelete: "SET NULL",
       },
-      created_at: { type: Sequelize.DATE, allowNull: false, defaultValue: Sequelize.fn('NOW') },
+      created_at: {
+        type: Sequelize.DATE,
+        allowNull: false,
+      },
+      updated_at: {
+        type: Sequelize.DATE,
+        allowNull: false,
+      },
     });
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('request_message');
-  }
+    await queryInterface.dropTable("RequestMessage");
+  },
 };

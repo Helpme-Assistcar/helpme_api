@@ -53,8 +53,8 @@ class ProviderPayment extends Model {
         tableName: "provider_payment",
         underscored: true,
         timestamps: true,
-        createdAt: "created_at",
-        updatedAt: "updated_at",
+        created_at: "created_at",
+        updated_at: "updated_at",
       }
     );
     return this;

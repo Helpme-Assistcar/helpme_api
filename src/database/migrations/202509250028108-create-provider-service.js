@@ -2,7 +2,7 @@
 
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("DeviceToken", {
+    await queryInterface.createTable("ProviderService", {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
@@ -10,21 +10,18 @@ module.exports = {
       },
       provider_id: {
         type: Sequelize.UUID,
-        allowNull: true,
+        allowNull: false,
         references: { model: "ProviderProfile", key: "id" },
         onDelete: "CASCADE",
       },
-      user_id: {
+      service_id: {
         type: Sequelize.UUID,
-        allowNull: true,
-        references: { model: "Users", key: "id" },
+        allowNull: false,
+        references: { model: "service", key: "id" },
         onDelete: "CASCADE",
       },
-      platform: {
-        type: Sequelize.ENUM("ios", "android", "web"),
-        allowNull: false,
-      },
-      token: { type: Sequelize.STRING(500), allowNull: false, unique: true },
+      price_min: { type: Sequelize.DECIMAL(10, 2), allowNull: true },
+      price_max: { type: Sequelize.DECIMAL(10, 2), allowNull: true },
       active: { type: Sequelize.BOOLEAN, allowNull: false, defaultValue: true },
       created_at: {
         type: Sequelize.DATE,
@@ -35,12 +32,19 @@ module.exports = {
         allowNull: false,
       },
     });
+
+    await queryInterface.addConstraint("ProviderService", {
+      fields: ["provider_id", "service_id"],
+      type: "unique",
+      name: "uq_provider_service_provider_id_service_id",
+    });
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("DeviceToken");
-    await queryInterface.sequelize.query(
-      'DROP TYPE IF EXISTS "enum_device_token_platform";'
+    await queryInterface.removeConstraint(
+      "ProviderService",
+      "uq_provider_service_provider_id_service_id"
     );
+    await queryInterface.dropTable("ProviderService");
   },
 };

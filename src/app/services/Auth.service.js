@@ -1,14 +1,14 @@
 // src/app/services/Auth.service.js
-const bcrypt = require('bcryptjs');
-const AppError = require('../errors/AppError');
-const AuthSchemas = require('../schemas/Auth.schemas');
+const bcrypt = require("bcryptjs");
+const AppError = require("../errors/AppError");
+const AuthSchemas = require("../schemas/Auth.schemas");
 
-const { Users, ClientProfile, ProviderProfile } = require('../models');
-const TokenManager = require('../../utils/Token.manager');
-const RefreshTokenService = require('./RefreshToken.service');
-const AuthInteractor = require('../interactors/AuthInteractor');
+const { Users, ClientProfile, ProviderProfile } = require("../models");
+const TokenManager = require("../../utils/Token.manager");
+const RefreshTokenService = require("./RefreshToken.service");
+const AuthInteractor = require("../interactors/AuthInteractor");
 
-const { Sequelize } = require('sequelize');
+const { Sequelize } = require("sequelize");
 
 class AuthService {
   // --------- helpers ---------
@@ -16,9 +16,9 @@ class AuthService {
     const refreshToken = TokenManager.generate(
       userId,
       process.env.CLIENT_SECRET_KEY,
-      '15d'
+      "15d"
     );
-    const accessToken = TokenManager.generate(userId, refreshToken, '7h');
+    const accessToken = TokenManager.generate(userId, refreshToken, "7h");
     await RefreshTokenService.saveTokens(userId, accessToken, refreshToken);
     return { accessToken };
   }
@@ -29,13 +29,17 @@ class AuthService {
 
   // --------- REGISTROS ---------
   async registerCustomer({ name, mail, password, phone }) {
-    const invalid = AuthSchemas.registerCustomerSchema({ name, mail, password });
+    const invalid = AuthSchemas.registerCustomerSchema({
+      name,
+      mail,
+      password,
+    });
     if (invalid) throw new AppError(400, invalid);
 
     const t = await Users.sequelize.transaction();
     try {
       const existing = await this.#findUserByMail(mail);
-      if (existing) throw new AppError(409, 'E-mail já cadastrado');
+      if (existing) throw new AppError(409, "E-mail já cadastrado");
 
       const user = await Users.create(
         {
@@ -52,21 +56,39 @@ class AuthService {
       await t.commit();
 
       const tokens = await this.#issueTokens(user.id);
-      return { user: { id: user.id, name: user.name, email: user.email, type: 'CLIENT' }, ...tokens };
+      return {
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          type: "CLIENT",
+        },
+        ...tokens,
+      };
     } catch (err) {
+      console.log("========================================");
+      console.log(err);
+      console.log("========================================");
       await t.rollback();
-      throw new AppError(err.statusCode || 500, err.message || 'Erro ao registrar cliente');
+      throw new AppError(
+        err.statusCode || 500,
+        err.message || "Erro ao registrar cliente"
+      );
     }
   }
 
   async registerProvider({ name, mail, password, phone, display_name }) {
-    const invalid = AuthSchemas.registerProviderSchema({ name, mail, password });
+    const invalid = AuthSchemas.registerProviderSchema({
+      name,
+      mail,
+      password,
+    });
     if (invalid) throw new AppError(400, invalid);
 
     const t = await Users.sequelize.transaction();
     try {
       const existing = await this.#findUserByMail(mail);
-      if (existing) throw new AppError(409, 'E-mail já cadastrado');
+      if (existing) throw new AppError(409, "E-mail já cadastrado");
 
       const user = await Users.create(
         {
@@ -82,7 +104,7 @@ class AuthService {
         {
           user_id: user.id,
           display_name: display_name || name,
-          status: 'OFFLINE',
+          status: "OFFLINE",
         },
         { transaction: t }
       );
@@ -91,13 +113,21 @@ class AuthService {
 
       const tokens = await this.#issueTokens(user.id);
       return {
-        user: { id: user.id, name: user.name, email: user.email, type: 'PROVIDER' },
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          type: "PROVIDER",
+        },
         provider: { id: provider.id, display_name: provider.display_name },
-        ...tokens
+        ...tokens,
       };
     } catch (err) {
       await t.rollback();
-      throw new AppError(err.statusCode || 500, err.message || 'Erro ao registrar prestador');
+      throw new AppError(
+        err.statusCode || 500,
+        err.message || "Erro ao registrar prestador"
+      );
     }
   }
 
@@ -107,14 +137,14 @@ class AuthService {
     if (invalid) throw new AppError(400, invalid);
 
     const user = await this.#findUserByMail(mail);
-    if (!user) throw new AppError(403, 'Credenciais inválidas');
+    if (!user) throw new AppError(403, "Credenciais inválidas");
 
     const ok = await bcrypt.compare(password, user.password_hash);
-    if (!ok) throw new AppError(403, 'Credenciais inválidas');
+    if (!ok) throw new AppError(403, "Credenciais inválidas");
 
     // Clientes: sem 2FA obrigatório
     const tokens = await this.#issueTokens(user.id);
-    return { accessToken: tokens.accessToken, type: 'CLIENT' };
+    return { accessToken: tokens.accessToken, type: "CLIENT" };
   }
 
   async providerLogin(mail, password, token) {
@@ -123,19 +153,28 @@ class AuthService {
 
     // precisa existir provider_profile
     const user = await this.#findUserByMail(mail);
-    if (!user) throw new AppError(403, 'Credenciais inválidas');
+    if (!user) throw new AppError(403, "Credenciais inválidas");
 
-    const providerProfile = await ProviderProfile.findOne({ where: { user_id: user.id } });
-    if (!providerProfile) throw new AppError(403, 'Conta de prestador não encontrada para este e-mail');
+    const providerProfile = await ProviderProfile.findOne({
+      where: { user_id: user.id },
+    });
+    if (!providerProfile)
+      throw new AppError(
+        403,
+        "Conta de prestador não encontrada para este e-mail"
+      );
 
     const ok = await bcrypt.compare(password, user.password_hash);
-    if (!ok) throw new AppError(403, 'Credenciais inválidas');
+    if (!ok) throw new AppError(403, "Credenciais inválidas");
 
     // 2FA (apenas prestador): se existir secret, o token é obrigatório
     if (user.two_factor_secret) {
-      if (!token) throw new AppError(400, 'Informe o código 2FA');
-      const verified = AuthInteractor.verifyToken(user.two_factor_secret, token);
-      if (!verified) throw new AppError(403, 'Código 2FA inválido');
+      if (!token) throw new AppError(400, "Informe o código 2FA");
+      const verified = AuthInteractor.verifyToken(
+        user.two_factor_secret,
+        token
+      );
+      if (!verified) throw new AppError(403, "Código 2FA inválido");
     }
 
     // se ainda não configurou 2FA, opcionalmente podemos sugerir setup
@@ -149,7 +188,7 @@ class AuthService {
     }
 
     const tokens = await this.#issueTokens(user.id);
-    const result = { accessToken: tokens.accessToken, type: 'PROVIDER' };
+    const result = { accessToken: tokens.accessToken, type: "PROVIDER" };
     if (twoFactor) result.twoFactor = twoFactor;
     return result;
   }
@@ -157,8 +196,11 @@ class AuthService {
   // --------- 2FA (somente prestadores) ---------
   async setup2FA(userId) {
     // verifica se é prestador
-    const provider = await ProviderProfile.findOne({ where: { user_id: userId } });
-    if (!provider) throw new AppError(403, 'Apenas prestadores podem ativar 2FA');
+    const provider = await ProviderProfile.findOne({
+      where: { user_id: userId },
+    });
+    if (!provider)
+      throw new AppError(403, "Apenas prestadores podem ativar 2FA");
 
     const user = await Users.findByPk(userId);
     const secretObj = AuthInteractor.generateSecret(user.email);
@@ -171,50 +213,66 @@ class AuthService {
     const invalid = AuthSchemas.verify2FASchema(token);
     if (invalid) throw new AppError(400, invalid);
 
-    const provider = await ProviderProfile.findOne({ where: { user_id: userId } });
-    if (!provider) throw new AppError(403, 'Apenas prestadores podem verificar 2FA');
+    const provider = await ProviderProfile.findOne({
+      where: { user_id: userId },
+    });
+    if (!provider)
+      throw new AppError(403, "Apenas prestadores podem verificar 2FA");
 
     const user = await Users.findByPk(userId);
     const temp = user.two_factor_temp_secret;
-    if (!temp) throw new AppError(400, '2FA não iniciado');
+    if (!temp) throw new AppError(400, "2FA não iniciado");
 
     const ok = AuthInteractor.verifyToken(temp, token);
-    if (!ok) throw new AppError(403, 'Código 2FA inválido');
+    if (!ok) throw new AppError(403, "Código 2FA inválido");
 
-    await user.update({ two_factor_secret: temp, two_factor_temp_secret: null });
-    return { message: '2FA ativado com sucesso' };
+    await user.update({
+      two_factor_secret: temp,
+      two_factor_temp_secret: null,
+    });
+    return { message: "2FA ativado com sucesso" };
   }
 
   async reset2FA(userId) {
-    const provider = await ProviderProfile.findOne({ where: { user_id: userId } });
-    if (!provider) throw new AppError(403, 'Apenas prestadores podem resetar 2FA');
+    const provider = await ProviderProfile.findOne({
+      where: { user_id: userId },
+    });
+    if (!provider)
+      throw new AppError(403, "Apenas prestadores podem resetar 2FA");
     const user = await Users.findByPk(userId);
-    await user.update({ two_factor_secret: null, two_factor_temp_secret: null });
-    return { message: '2FA resetado' };
+    await user.update({
+      two_factor_secret: null,
+      two_factor_temp_secret: null,
+    });
+    return { message: "2FA resetado" };
   }
 
   // --------- Outros ---------
   async autoLogin(userId) {
     const user = await Users.findByPk(userId, {
-      attributes: ['id', 'name', 'email'],
+      attributes: ["id", "name", "email"],
       include: [
-        { model: ClientProfile, as: 'clientProfile', attributes: ['user_id'] },
-        { model: ProviderProfile, as: 'providerProfile', attributes: ['id', 'display_name'] }
-      ]
+        { model: ClientProfile, as: "clientProfile", attributes: ["user_id"] },
+        {
+          model: ProviderProfile,
+          as: "providerProfile",
+          attributes: ["id", "display_name"],
+        },
+      ],
     });
-    if (!user) throw new AppError(404, 'Usuário não encontrado');
+    if (!user) throw new AppError(404, "Usuário não encontrado");
 
     const roles = [];
-    if (user.clientProfile) roles.push('CLIENT');
-    if (user.providerProfile) roles.push('PROVIDER');
+    if (user.clientProfile) roles.push("CLIENT");
+    if (user.providerProfile) roles.push("PROVIDER");
 
     return {
       user: {
         id: user.id,
         name: user.name,
         email: user.email,
-        roles
-      }
+        roles,
+      },
     };
   }
 }
