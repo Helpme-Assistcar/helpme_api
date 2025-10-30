@@ -40,6 +40,10 @@ class Users extends Model {
           allowNull: true,
           unique: true,
         },
+        photo: {
+          type: Sequelize.TEXT,
+          allowNull: true,
+        },
         password: {
           // Campo virtual para receber a senha em texto puro
           type: Sequelize.VIRTUAL,

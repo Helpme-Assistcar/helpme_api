@@ -15,7 +15,7 @@ module.exports = {
         references: { model: "Users", key: "id" },
         onDelete: "CASCADE",
       },
-      display_name: { type: Sequelize.STRING(255), allowNull: true },
+      service_provided: { type: Sequelize.STRING(255), allowNull: false },
       bio: { type: Sequelize.TEXT, allowNull: true },
       service_radius_km: { type: Sequelize.DECIMAL(5, 2), allowNull: true },
       status: {

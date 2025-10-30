@@ -20,13 +20,13 @@ class ProviderProfile extends Model {
             notNull: { msg: "user_id é obrigatório." },
           },
         },
-        display_name: {
+        service_provided: {
           type: Sequelize.STRING(255),
-          allowNull: true,
+          allowNull: false,
           validate: {
             len: {
               args: [2, 255],
-              msg: "Nome de exibição deve ter entre 2 e 255 caracteres.",
+              msg: "Serviço a ser prestado deve ter entre 2 e 255 caracteres.",
             },
           },
         },

@@ -28,7 +28,7 @@ class AuthService {
   }
 
   // --------- REGISTROS ---------
-  async registerCustomer({ name, mail, password, phone }) {
+  async registerCustomer({ name, mail, password, phone, photo }) {
     const invalid = AuthSchemas.registerCustomerSchema({
       name,
       mail,
@@ -47,6 +47,7 @@ class AuthService {
           email: mail,
           phone: phone || null,
           password_hash: bcrypt.hashSync(password, 8),
+          photo,
         },
         { transaction: t }
       );
@@ -66,9 +67,6 @@ class AuthService {
         ...tokens,
       };
     } catch (err) {
-      console.log("========================================");
-      console.log(err);
-      console.log("========================================");
       await t.rollback();
       throw new AppError(
         err.statusCode || 500,
@@ -77,7 +75,14 @@ class AuthService {
     }
   }
 
-  async registerProvider({ name, mail, password, phone, display_name }) {
+  async registerProvider({
+    name,
+    mail,
+    password,
+    phone,
+    service_provided,
+    photo,
+  }) {
     const invalid = AuthSchemas.registerProviderSchema({
       name,
       mail,
@@ -96,6 +101,7 @@ class AuthService {
           email: mail,
           phone: phone || null,
           password_hash: bcrypt.hashSync(password, 8),
+          photo,
         },
         { transaction: t }
       );
@@ -103,7 +109,7 @@ class AuthService {
       const provider = await ProviderProfile.create(
         {
           user_id: user.id,
-          display_name: display_name || name,
+          service_provided: service_provided,
           status: "OFFLINE",
         },
         { transaction: t }
@@ -119,7 +125,10 @@ class AuthService {
           email: user.email,
           type: "PROVIDER",
         },
-        provider: { id: provider.id, display_name: provider.display_name },
+        provider: {
+          id: provider.id,
+          service_provided: provider.service_provided,
+        },
         ...tokens,
       };
     } catch (err) {
@@ -139,12 +148,21 @@ class AuthService {
     const user = await this.#findUserByMail(mail);
     if (!user) throw new AppError(403, "Credenciais inválidas");
 
+    const providerProfile = await ProviderProfile.findOne({
+      where: { user_id: user.id },
+    });
+
     const ok = await bcrypt.compare(password, user.password_hash);
     if (!ok) throw new AppError(403, "Credenciais inválidas");
 
     // Clientes: sem 2FA obrigatório
-    const tokens = await this.#issueTokens(user.id);
-    return { accessToken: tokens.accessToken, type: "CLIENT" };
+    if (!providerProfile) {
+      const tokens = await this.#issueTokens(user.id);
+      return { accessToken: tokens.accessToken, type: "CLIENT" };
+    } else {
+      const tokens = await this.#issueTokens(user.id);
+      return { accessToken: tokens.accessToken, type: "PROVIDER" };
+    }
   }
 
   async providerLogin(mail, password, token) {
@@ -167,30 +185,32 @@ class AuthService {
     const ok = await bcrypt.compare(password, user.password_hash);
     if (!ok) throw new AppError(403, "Credenciais inválidas");
 
-    // 2FA (apenas prestador): se existir secret, o token é obrigatório
-    if (user.two_factor_secret) {
-      if (!token) throw new AppError(400, "Informe o código 2FA");
-      const verified = AuthInteractor.verifyToken(
-        user.two_factor_secret,
-        token
-      );
-      if (!verified) throw new AppError(403, "Código 2FA inválido");
-    }
-
-    // se ainda não configurou 2FA, opcionalmente podemos sugerir setup
-    let twoFactor;
-    if (!user.two_factor_secret) {
-      // gera secreta temporária e QR para o prestador ativar depois
-      const secretObj = AuthInteractor.generateSecret(user.email);
-      const qrCode = await AuthInteractor.generateQRCode(secretObj.otpauth_url);
-      await user.update({ two_factor_temp_secret: secretObj.base32 });
-      twoFactor = { qrCode, secret: secretObj.base32 };
-    }
-
     const tokens = await this.#issueTokens(user.id);
-    const result = { accessToken: tokens.accessToken, type: "PROVIDER" };
-    if (twoFactor) result.twoFactor = twoFactor;
-    return result;
+    return { accessToken: tokens.accessToken, type: "PROVIDER" };
+    // // 2FA (apenas prestador): se existir secret, o token é obrigatório
+    // if (user.two_factor_secret) {
+    //   if (!token) throw new AppError(400, "Informe o código 2FA");
+    //   const verified = AuthInteractor.verifyToken(
+    //     user.two_factor_secret,
+    //     token
+    //   );
+    //   if (!verified) throw new AppError(403, "Código 2FA inválido");
+    // }
+
+    // // se ainda não configurou 2FA, opcionalmente podemos sugerir setup
+    // let twoFactor;
+    // if (!user.two_factor_secret) {
+    //   // gera secreta temporária e QR para o prestador ativar depois
+    //   const secretObj = AuthInteractor.generateSecret(user.email);
+    //   const qrCode = await AuthInteractor.generateQRCode(secretObj.otpauth_url);
+    //   await user.update({ two_factor_temp_secret: secretObj.base32 });
+    //   twoFactor = { qrCode, secret: secretObj.base32 };
+    // }
+
+    // const tokens = await this.#issueTokens(user.id);
+    // const result = { accessToken: tokens.accessToken, type: "PROVIDER" };
+    // if (twoFactor) result.twoFactor = twoFactor;
+    // return result;
   }
 
   // --------- 2FA (somente prestadores) ---------
@@ -256,7 +276,7 @@ class AuthService {
         {
           model: ProviderProfile,
           as: "providerProfile",
-          attributes: ["id", "display_name"],
+          attributes: ["id", "service_provided"],
         },
       ],
     });

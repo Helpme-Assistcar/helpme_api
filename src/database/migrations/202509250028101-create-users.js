@@ -11,6 +11,10 @@ module.exports = {
       name: { type: Sequelize.STRING, allowNull: false },
       email: { type: Sequelize.STRING, allowNull: true, unique: true },
       phone: { type: Sequelize.STRING, allowNull: true, unique: true },
+      photo: {
+        type: Sequelize.TEXT,
+        allowNull: true,
+      },
       password_hash: { type: Sequelize.TEXT, allowNull: false },
       email_verified: {
         type: Sequelize.BOOLEAN,
