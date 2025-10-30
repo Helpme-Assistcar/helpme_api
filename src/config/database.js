@@ -1,7 +1,8 @@
 require("dotenv").config();
 
 module.exports = {
-  dialect: "mysql",
+  // dialect: "mysql",
+  dialect: "postgres",
   dialectOptions: {
     decimalNumbers: true,
   },
