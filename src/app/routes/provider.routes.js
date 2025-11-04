@@ -10,5 +10,10 @@ routes.get(
   authMiddleware.isAuthenticated,
   ProviderController.findProvider
 );
+routes.put(
+  "/status",
+  authMiddleware.isAuthenticated,
+  ProviderController.changeStatus
+);
 
 module.exports = routes;
