@@ -11,7 +11,7 @@ class ClientService {
           model: ProviderProfile,
           as: "providerProfile",
           required: true,
-          attributes: ["service_provided", "status", "avg_rating"],
+          attributes: ["id", "service_provided", "status", "avg_rating"],
           where: { status: "ONLINE" },
         },
       ],

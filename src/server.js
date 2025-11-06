@@ -1,12 +1,9 @@
 require("dotenv").config();
+const appInstance = require("./app");
 
-const http = require("http");
-const app = require("./app");
+const PORT = process.env.SERVER_PORT || 8088;
 
-const PORT = process.env.SERVER_PORT || 3000;
-
-const server = http.createServer(app);
-
-server.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
+// Usa o server HTTP que criamos dentro do App (com socket.io)
+appInstance.server.listen(PORT, () => {
+  console.log(`🚀 Servidor rodando na porta ${PORT}`);
 });

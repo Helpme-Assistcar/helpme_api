@@ -7,6 +7,14 @@ class ProviderService {
     const user = await Users.findOne({
       where: { id: userId },
       attributes: ["name", "photo", "email", "phone"],
+      include: [
+        {
+          model: ProviderProfile,
+          as: "providerProfile",
+          required: true,
+          attributes: ["id", "service_provided", "status", "avg_rating"],
+        },
+      ],
     });
     if (!user) throw new AppError(403, "Usuário não encontrado");
 

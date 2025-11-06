@@ -55,7 +55,7 @@ class ServiceRequest extends Model {
       },
       {
         sequelize,
-        tableName: "service_request",
+        tableName: "ServiceRequest",
         underscored: true,
         timestamps: true,
       }

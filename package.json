@@ -23,6 +23,7 @@
     "nodemon": "^3.1.10",
     "qrcode": "^1.5.4",
     "sequelize": "^6.37.7",
+    "socket.io": "^4.8.1",
     "speakeasy": "^2.0.0",
     "sucrase": "^3.35.0",
     "uuid": "^13.0.0"
