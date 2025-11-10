@@ -5,6 +5,8 @@ const routes = Router();
 const ClientController = require("../controllers/Client.controller");
 const authMiddleware = require("../middlewares/MiddlewareAuth");
 
+routes.get("/", authMiddleware.isAuthenticated, ClientController.findClient);
+
 routes.get(
   "/all",
   authMiddleware.isAuthenticated,

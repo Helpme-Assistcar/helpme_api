@@ -10,7 +10,7 @@ class ServiceRequestController {
       const serviceRequest = await ServiceRequest.create({
         client_id: userId,
         provider_id: professionalId,
-        // serviceType,
+        serviceType,
         status: "PENDING",
       });
 
@@ -26,6 +26,7 @@ class ServiceRequestController {
           clientId: userId,
           professionalId,
           serviceType,
+          serviceRequestId: serviceRequest.id,
         });
         console.log(`📢 Chamado enviado para profissional ${professionalId}`);
       }

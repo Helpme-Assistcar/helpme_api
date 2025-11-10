@@ -19,9 +19,18 @@ class ProviderController {
       const data = await ProviderService.changeStatus(userId);
       return res.json(data);
     } catch (error) {
-      console.log("========================================");
-      console.log(error);
-      console.log("========================================");
+      return res
+        .status(error.statusCode || 500)
+        .json({ message: error.message });
+    }
+  }
+
+  async findClientService(req, res) {
+    try {
+      const { id } = req.params;
+      const data = await ProviderService.findClientService(id);
+      return res.json(data);
+    } catch (error) {
       return res
         .status(error.statusCode || 500)
         .json({ message: error.message });
