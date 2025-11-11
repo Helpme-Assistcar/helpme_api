@@ -46,7 +46,7 @@ module.exports = {
         defaultValue: "PENDING",
       },
       request_location: {
-        type: Sequelize.TEXT,
+        type: Sequelize.GEOMETRY("POINT"),
         allowNull: true,
       },
       address_snapshot: { type: Sequelize.STRING(500), allowNull: true },

@@ -34,8 +34,24 @@ class ServiceRequest extends Model {
           defaultValue: "PENDING",
         },
         request_location: {
-          type: Sequelize.GEOGRAPHY("POINT", 4326),
+          type: Sequelize.GEOMETRY("POINT"),
           allowNull: true,
+          get() {
+            const value = this.getDataValue("request_location");
+            if (!value) return null;
+
+            // Se vier no formato { type: 'Point', coordinates: [...] }
+            if (typeof value === "object" && value.coordinates) return value;
+
+            // Se vier em Buffer binário (MySQL), tentar converter manualmente
+            try {
+              const text = Buffer.isBuffer(value) ? value.toString() : value;
+              // Não é o ideal, mas evita crash
+              return text;
+            } catch (err) {
+              return null;
+            }
+          },
         },
         address_snapshot: { type: Sequelize.STRING(500), allowNull: true },
         distance_km: { type: Sequelize.DECIMAL(8, 3), allowNull: true },

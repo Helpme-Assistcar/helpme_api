@@ -11,4 +11,16 @@ routes.post(
   ServiceRequestController.create
 );
 
+routes.put(
+  "/accept",
+  authMiddleware.isAuthenticated,
+  ServiceRequestController.accept
+);
+
+routes.put(
+  "/cancel",
+  authMiddleware.isAuthenticated,
+  ServiceRequestController.cancel
+);
+
 module.exports = routes;
