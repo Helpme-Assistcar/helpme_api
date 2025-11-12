@@ -271,29 +271,20 @@ class AuthService {
   async autoLogin(userId) {
     const user = await Users.findByPk(userId, {
       attributes: ["id", "name", "email"],
-      include: [
-        { model: ClientProfile, as: "clientProfile", attributes: ["user_id"] },
-        {
-          model: ProviderProfile,
-          as: "providerProfile",
-          attributes: ["id", "service_provided"],
-        },
-      ],
     });
     if (!user) throw new AppError(404, "Usuário não encontrado");
 
-    const roles = [];
-    if (user.clientProfile) roles.push("CLIENT");
-    if (user.providerProfile) roles.push("PROVIDER");
+    const providerProfile = await ProviderProfile.findOne({
+      where: { user_id: user.id },
+    });
 
-    return {
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        roles,
-      },
-    };
+    if (!providerProfile) {
+      const tokens = await this.#issueTokens(user.id);
+      return { accessToken: tokens.accessToken, type: "CLIENT" };
+    } else {
+      const tokens = await this.#issueTokens(user.id);
+      return { accessToken: tokens.accessToken, type: "PROVIDER" };
+    }
   }
 }
 
