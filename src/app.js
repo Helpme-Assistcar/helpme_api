@@ -18,6 +18,7 @@ class App {
 
     // Mapa para guardar os profissionais conectados
     this.connectedProfessionals = new Map();
+    this.connectedCustomers = new Map();
 
     this.middlewares();
     this.sockets(); // inicializa Socket.io
@@ -26,6 +27,7 @@ class App {
     // Torna acessível nos controllers
     this.app.set("io", this.io);
     this.app.set("connectedProfessionals", this.connectedProfessionals);
+    this.app.set("connectedCustomers", this.connectedCustomers);
   }
 
   middlewares() {
@@ -56,12 +58,24 @@ class App {
         this.connectedProfessionals.set(professionalId, socket.id);
       });
 
+      socket.on("register_customer", ({ customerId }) => {
+        console.log(`🙋 Cliente ${customerId} conectado`);
+        this.connectedCustomers.set(customerId, socket.id);
+      });
+
       socket.on("disconnect", () => {
         for (let [id, sId] of this.connectedProfessionals.entries()) {
           if (sId === socket.id) {
             console.log(`❌ Profissional ${id} desconectado`);
             this.connectedProfessionals.delete(id);
             break;
+          }
+        }
+        for (let [id, sId] of this.connectedCustomers.entries()) {
+          if (sId === socket.id) {
+            console.log(`🚫 Cliente ${id} desconectado`);
+            this.connectedCustomers.delete(id);
+            return;
           }
         }
       });

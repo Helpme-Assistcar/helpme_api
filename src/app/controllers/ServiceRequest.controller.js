@@ -45,7 +45,7 @@ class ServiceRequestController {
   async accept(req, res) {
     try {
       const { service_id } = req.body;
-      const data = await ServiceRequestService.accept(service_id);
+      const data = await ServiceRequestService.accept(req, service_id);
       return res.json(data);
     } catch (error) {
       console.error(error);
@@ -57,7 +57,7 @@ class ServiceRequestController {
     try {
       const { service_id } = req.body;
       const { userId } = req;
-      const data = await ServiceRequestService.cancel(service_id, userId);
+      const data = await ServiceRequestService.cancel(req, service_id, userId);
       return res.json(data);
     } catch (error) {
       console.error(error);

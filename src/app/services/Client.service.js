@@ -1,12 +1,20 @@
 const AppError = require("../errors/AppError");
 
-const { Users, ProviderProfile } = require("../models");
+const { Users, ProviderProfile, ClientProfile } = require("../models");
 
 class ClientService {
   async findClient(userId) {
     const user = await Users.findOne({
       where: { id: userId },
       attributes: ["name", "photo", "email", "phone"],
+      include: [
+        {
+          model: ClientProfile,
+          as: "clientProfile",
+          required: true,
+          attributes: ["user_id"],
+        },
+      ],
     });
     if (!user) throw new AppError(403, "Usuário não encontrado");
 
