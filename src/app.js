@@ -46,7 +46,7 @@ class App {
         limit: "80MB",
       })
     );
-    this.app.options("*", cors());
+    this.app.use(cors());
   }
 
   sockets() {
