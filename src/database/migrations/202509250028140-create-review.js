@@ -40,7 +40,7 @@ module.exports = {
     });
 
     await queryInterface.sequelize.query(`
-      ALTER TABLE review
+      ALTER TABLE Review
       ADD CONSTRAINT review_rating_check CHECK (rating BETWEEN 1 AND 5);
     `);
   },

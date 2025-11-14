@@ -23,7 +23,7 @@ class Review extends Model {
       },
       {
         sequelize,
-        tableName: "review",
+        tableName: "Review",
         underscored: true,
         timestamps: true,
         created_at: "created_at",
