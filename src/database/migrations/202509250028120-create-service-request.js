@@ -45,8 +45,12 @@ module.exports = {
         allowNull: false,
         defaultValue: "PENDING",
       },
-      request_location: {
-        type: Sequelize.GEOMETRY("POINT"),
+      latitude: {
+        type: Sequelize.FLOAT,
+        allowNull: true,
+      },
+      longitude: {
+        type: Sequelize.FLOAT,
         allowNull: true,
       },
       address_snapshot: { type: Sequelize.STRING(500), allowNull: true },

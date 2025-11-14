@@ -53,6 +53,14 @@ class ServiceRequest extends Model {
             }
           },
         },
+        latitude: {
+          type: Sequelize.FLOAT,
+          allowNull: true,
+        },
+        longitude: {
+          type: Sequelize.FLOAT,
+          allowNull: true,
+        },
         address_snapshot: { type: Sequelize.STRING(500), allowNull: true },
         distance_km: { type: Sequelize.DECIMAL(8, 3), allowNull: true },
         price_estimate: { type: Sequelize.DECIMAL(10, 2), allowNull: true },
