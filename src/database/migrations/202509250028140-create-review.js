@@ -39,10 +39,10 @@ module.exports = {
       },
     });
 
-    await queryInterface.sequelize.query(`
-      ALTER TABLE Review
-      ADD CONSTRAINT review_rating_check CHECK (rating BETWEEN 1 AND 5);
-    `);
+    // await queryInterface.sequelize.query(`
+    //   ALTER TABLE Review
+    //   ADD CONSTRAINT review_rating_check CHECK (rating BETWEEN 1 AND 5);
+    // `);
   },
 
   async down(queryInterface, Sequelize) {
