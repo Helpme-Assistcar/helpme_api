@@ -17,7 +17,7 @@ module.exports = {
       service_id: {
         type: Sequelize.UUID,
         allowNull: false,
-        references: { model: "service", key: "id" },
+        references: { model: "Service", key: "id" },
         onDelete: "CASCADE",
       },
       price_min: { type: Sequelize.DECIMAL(10, 2), allowNull: true },
