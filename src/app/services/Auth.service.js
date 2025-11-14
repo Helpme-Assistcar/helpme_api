@@ -267,9 +267,27 @@ class AuthService {
     return { message: "2FA resetado" };
   }
 
-  // --------- Outros ---------
   async autoLogin(userId) {
     const user = await Users.findByPk(userId, {
+      attributes: ["id", "name", "email"],
+    });
+    if (!user) throw new AppError(404, "Usuário não encontrado");
+
+    const providerProfile = await ProviderProfile.findOne({
+      where: { user_id: user.id },
+    });
+
+    if (!providerProfile) {
+      const tokens = await this.#issueTokens(user.id);
+      return { accessToken: tokens.accessToken, type: "CLIENT" };
+    } else {
+      const tokens = await this.#issueTokens(user.id);
+      return { accessToken: tokens.accessToken, type: "PROVIDER" };
+    }
+  }
+  async googleLogin(email) {
+    const user = await Users.findOne({
+      where: { email },
       attributes: ["id", "name", "email"],
     });
     if (!user) throw new AppError(404, "Usuário não encontrado");

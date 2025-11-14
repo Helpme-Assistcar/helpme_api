@@ -117,6 +117,18 @@ class AuthController {
         .json({ message: error.message });
     }
   }
+
+  async googleLogin(req, res) {
+    try {
+      const { email } = req.body;
+      const response = await AuthService.googleLogin(email);
+      return res.status(200).json(response);
+    } catch (error) {
+      return res
+        .status(error.statusCode || 500)
+        .json({ message: error.message });
+    }
+  }
 }
 
 module.exports = new AuthController();

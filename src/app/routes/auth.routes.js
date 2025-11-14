@@ -37,6 +37,7 @@ routes.post(
   authMiddleware.isAuthenticated,
   AuthController.autoLogin
 );
+routes.post("/google", AuthController.googleLogin);
 
 // Refresh token (reutiliza seu controller)
 routes.post("/refresh", RefreshTokenController.refreshToken);
