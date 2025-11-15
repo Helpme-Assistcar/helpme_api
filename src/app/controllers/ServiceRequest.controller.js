@@ -3,8 +3,13 @@ const ServiceRequestService = require("../services/ServiceRequest.service");
 
 class ServiceRequestController {
   async create(req, res) {
-    const { professionalId, serviceType, request_location, address_snapshot } =
-      req.body;
+    const {
+      professionalId,
+      serviceType,
+      latitude,
+      longitude,
+      address_snapshot,
+    } = req.body;
     const { userId } = req;
 
     try {
@@ -14,7 +19,9 @@ class ServiceRequestController {
         provider_id: professionalId,
         serviceType,
         status: "PENDING",
-        request_location,
+        // request_location,
+        latitude,
+        longitude,
         address_snapshot,
       });
 
@@ -37,7 +44,6 @@ class ServiceRequestController {
 
       return res.status(201).json(serviceRequest);
     } catch (error) {
-      console.error(error);
       return res.status(500).json({ error: "Erro ao criar chamado" });
     }
   }
