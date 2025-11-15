@@ -57,6 +57,7 @@ class ProviderProfile extends Model {
       {
         sequelize,
         tableName: "ProviderProfile",
+        freezeTableName: true,
         underscored: true,
         timestamps: true,
         created_at: "created_at",

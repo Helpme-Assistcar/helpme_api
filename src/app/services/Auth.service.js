@@ -91,6 +91,7 @@ class AuthService {
     if (invalid) throw new AppError(400, invalid);
 
     const t = await Users.sequelize.transaction();
+
     try {
       const existing = await this.#findUserByMail(mail);
       if (existing) throw new AppError(409, "E-mail já cadastrado");
@@ -132,6 +133,9 @@ class AuthService {
         ...tokens,
       };
     } catch (err) {
+      console.log("========================================");
+      console.log(err);
+      console.log("========================================");
       await t.rollback();
       throw new AppError(
         err.statusCode || 500,

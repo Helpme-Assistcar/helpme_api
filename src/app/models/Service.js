@@ -22,7 +22,8 @@ class Service extends Model {
       },
       {
         sequelize,
-        tableName: "service",
+        tableName: "Service",
+        freezeTableName: true,
         underscored: true,
         timestamps: true,
       }

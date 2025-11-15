@@ -27,6 +27,7 @@ class AuthController {
     try {
       const { name, mail, email, password, phone, service_provided, photo } =
         req.body;
+
       const data = await AuthService.registerProvider({
         name,
         mail: mail || email,

@@ -22,7 +22,8 @@ class ProviderPresence extends Model {
       },
       {
         sequelize,
-        tableName: "provider_presence",
+        tableName: "ProviderPresence",
+        freezeTableName: true,
         underscored: true,
         timestamps: true,
         created_at: false,

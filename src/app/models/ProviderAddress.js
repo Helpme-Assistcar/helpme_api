@@ -33,7 +33,8 @@ class ProviderAddress extends Model {
       },
       {
         sequelize,
-        tableName: "provider_address",
+        tableName: "ProviderAddress",
+        freezeTableName: true,
         underscored: true,
         timestamps: true,
         created_at: "created_at",

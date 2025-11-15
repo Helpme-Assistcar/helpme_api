@@ -23,7 +23,8 @@ class DocumentType extends Model {
       },
       {
         sequelize,
-        tableName: "document_type",
+        tableName: "DocumentType",
+        freezeTableName: true,
         underscored: true,
         timestamps: true,
         created_at: "created_at",

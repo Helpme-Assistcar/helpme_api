@@ -28,7 +28,8 @@ class ServiceCategory extends Model {
       },
       {
         sequelize,
-        tableName: "service_category",
+        tableName: "ServiceCategory",
+        freezeTableName: true,
         underscored: true,
         timestamps: true,
       }

@@ -27,7 +27,8 @@ class ProviderDocument extends Model {
       },
       {
         sequelize,
-        tableName: "provider_document",
+        tableName: "ProviderDocument",
+        freezeTableName: true,
         underscored: true,
         timestamps: true,
       }

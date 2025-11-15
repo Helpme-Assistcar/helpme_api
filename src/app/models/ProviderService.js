@@ -31,7 +31,8 @@ class ProviderService extends Model {
       },
       {
         sequelize,
-        tableName: "provider_service",
+        tableName: "ProviderService",
+        freezeTableName: true,
         underscored: true,
         timestamps: true,
         created_at: "created_at",

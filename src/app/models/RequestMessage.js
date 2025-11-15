@@ -18,7 +18,8 @@ class RequestMessage extends Model {
       },
       {
         sequelize,
-        tableName: "request_message",
+        tableName: "RequestMessage",
+        freezeTableName: true,
         underscored: true,
         timestamps: true,
         created_at: "created_at",

@@ -82,6 +82,7 @@ class ServiceRequest extends Model {
         tableName: "ServiceRequest",
         underscored: true,
         timestamps: true,
+        freezeTableName: true,
       }
     );
     return this;

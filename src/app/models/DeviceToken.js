@@ -26,7 +26,8 @@ class DeviceToken extends Model {
       },
       {
         sequelize,
-        tableName: "device_token",
+        tableName: "DeviceToken",
+        freezeTableName: true,
         underscored: true,
         timestamps: true,
         created_at: "created_at",

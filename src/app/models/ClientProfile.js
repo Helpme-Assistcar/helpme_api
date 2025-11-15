@@ -19,6 +19,7 @@ class ClientProfile extends Model {
       {
         sequelize,
         tableName: "ClientProfile",
+        freezeTableName: true,
         underscored: true,
         timestamps: true,
       }

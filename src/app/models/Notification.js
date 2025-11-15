@@ -24,7 +24,8 @@ class Notification extends Model {
       },
       {
         sequelize,
-        tableName: "notification",
+        tableName: "Notification",
+        freezeTableName: true,
         underscored: true,
         timestamps: true,
         created_at: "created_at",

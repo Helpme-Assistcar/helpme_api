@@ -16,7 +16,8 @@ class FavoriteProvider extends Model {
       },
       {
         sequelize,
-        tableName: "favorite_provider",
+        tableName: "FavoriteProvider",
+        freezeTableName: true,
         underscored: true,
         timestamps: true,
         created_at: "created_at",

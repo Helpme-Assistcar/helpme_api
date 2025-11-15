@@ -60,6 +60,7 @@ class RefreshToken extends Model {
         sequelize,
         tableName: "RefreshToken",
         freezeTableName: true,
+        freezeTableName: true,
       }
     );
   }

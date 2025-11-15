@@ -23,7 +23,8 @@ class FileUpload extends Model {
       },
       {
         sequelize,
-        tableName: "file_upload",
+        tableName: "FileUpload",
+        freezeTableName: true,
         underscored: true,
         timestamps: true,
         created_at: "created_at",

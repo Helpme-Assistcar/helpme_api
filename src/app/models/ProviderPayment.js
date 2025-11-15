@@ -50,7 +50,8 @@ class ProviderPayment extends Model {
       },
       {
         sequelize,
-        tableName: "provider_payment",
+        tableName: "ProviderPayment",
+        freezeTableName: true,
         underscored: true,
         timestamps: true,
         created_at: "created_at",

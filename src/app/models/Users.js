@@ -80,6 +80,8 @@ class Users extends Model {
         sequelize,
         underscored: true,
         timestamps: true,
+        modelName: "Users",
+        freezeTableName: true,
       }
     );
 

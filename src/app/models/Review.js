@@ -24,6 +24,7 @@ class Review extends Model {
       {
         sequelize,
         tableName: "Review",
+        freezeTableName: true,
         underscored: true,
         timestamps: true,
         created_at: "created_at",
