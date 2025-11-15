@@ -26,7 +26,7 @@ class ProviderService {
     return user;
   }
 
-  async changeStatus(userId) {
+  async changeStatus(userId, status) {
     const provider = await ProviderProfile.findOne({
       where: { user_id: userId },
       attributes: ["id", "status"],
@@ -34,7 +34,11 @@ class ProviderService {
 
     if (!provider) throw new AppError(403, "Profissional não encontrado");
 
-    const newStatus = provider.status === "OFFLINE" ? "ONLINE" : "OFFLINE";
+    const newStatus = status
+      ? status
+      : provider.status === "OFFLINE"
+        ? "ONLINE"
+        : "OFFLINE";
 
     await provider.update({ status: newStatus });
 

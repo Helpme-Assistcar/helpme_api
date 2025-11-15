@@ -36,7 +36,7 @@ class ClientService {
     });
 
     if (!users || users.length === 0) {
-      throw new AppError(403, "Nenhum provedor encontrado");
+      return [];
     }
 
     return users;

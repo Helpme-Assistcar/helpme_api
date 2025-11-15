@@ -16,7 +16,13 @@ class ProviderController {
   async changeStatus(req, res) {
     try {
       const userId = req.userId;
-      const data = await ProviderService.changeStatus(userId);
+      const { status } = req.body;
+
+      console.log("========================================");
+      console.log(status);
+      console.log("========================================");
+
+      const data = await ProviderService.changeStatus(userId, status);
       return res.json(data);
     } catch (error) {
       return res
