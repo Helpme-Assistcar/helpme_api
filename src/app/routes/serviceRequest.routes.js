@@ -23,4 +23,10 @@ routes.put(
   ServiceRequestController.cancel
 );
 
+routes.get(
+  "/:id",
+  authMiddleware.isAuthenticated,
+  ServiceRequestController.findReq
+);
+
 module.exports = routes;

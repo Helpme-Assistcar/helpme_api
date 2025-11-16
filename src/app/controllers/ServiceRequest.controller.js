@@ -67,7 +67,17 @@ class ServiceRequestController {
       return res.json(data);
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ error: "Erro ao criar chamado" });
+      return res.status(500).json({ error: "Erro ao cancelar chamado" });
+    }
+  }
+
+  async findReq(req, res) {
+    try {
+      const { id } = req.params;
+      const data = await ServiceRequestService.findReq(id);
+      return res.json(data);
+    } catch (error) {
+      return res.status(500).json({ error: "Erro ao buscar chamado" });
     }
   }
 }

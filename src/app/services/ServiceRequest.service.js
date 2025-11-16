@@ -1,6 +1,11 @@
 const AppError = require("../errors/AppError");
 
-const { ServiceRequest } = require("../models");
+const {
+  ServiceRequest,
+  Users,
+  ClientProfile,
+  ProviderProfile,
+} = require("../models");
 
 class ServiceRequestService {
   async accept(req, id) {
@@ -29,7 +34,7 @@ class ServiceRequestService {
     return serviceRequest;
   }
 
-  async cancel(service_id, user_id) {
+  async cancel(req, service_id, user_id) {
     const serviceRequest = await ServiceRequest.findByPk(service_id);
     if (!serviceRequest) throw new AppError(403, "Serviço não encontrado");
 
@@ -53,6 +58,36 @@ class ServiceRequestService {
     serviceRequest.update({ cancelled_at: new Date(), cancelled_by: user_id });
 
     return service;
+  }
+
+  async findReq(service_id) {
+    const serviceRequest = await ServiceRequest.findByPk(service_id, {
+      include: [
+        {
+          model: ClientProfile,
+          as: "client",
+          include: [
+            {
+              model: Users,
+              as: "user",
+            },
+          ],
+        },
+        {
+          model: ProviderProfile,
+          as: "provider",
+          include: [
+            {
+              model: Users,
+              as: "user",
+            },
+          ],
+        },
+      ],
+    });
+    if (!serviceRequest) throw new AppError(403, "Serviço não encontrado");
+
+    return serviceRequest;
   }
 }
 
