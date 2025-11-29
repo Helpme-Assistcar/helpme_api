@@ -57,7 +57,35 @@ class ServiceRequestService {
 
     serviceRequest.update({ cancelled_at: new Date(), cancelled_by: user_id });
 
-    return service;
+    return serviceRequest;
+  }
+
+  async clientCancel(req, service_id, user_id) {
+    const serviceRequest = await ServiceRequest.findByPk(service_id);
+    if (!serviceRequest) throw new AppError(403, "Serviço não encontrado");
+
+    const io = req.app.get("io");
+    const connectedProfessionals = req.app.get("connectedProfessionals");
+
+    // 3. Envia o evento em tempo real pro profissional
+    const targetSocket = connectedProfessionals.get(
+      serviceRequest?.provider_id
+    );
+
+    if (targetSocket) {
+      io.to(targetSocket).emit("new_call", {
+        accepted: false,
+        professionalId: serviceRequest?.provider_id,
+        serviceRequestId: serviceRequest.id,
+      });
+      console.log(
+        `📢 Serviço do cliente: ${serviceRequest?.client_id} foi recusado.`
+      );
+    }
+
+    serviceRequest.update({ cancelled_at: new Date(), cancelled_by: user_id });
+
+    return serviceRequest;
   }
 
   async findReq(service_id) {

@@ -66,7 +66,24 @@ class ServiceRequestController {
       const data = await ServiceRequestService.cancel(req, service_id, userId);
       return res.json(data);
     } catch (error) {
-      console.error(error);
+      return res.status(500).json({ error: "Erro ao cancelar chamado" });
+    }
+  }
+
+  async clientCancel(req, res) {
+    try {
+      const { service_id } = req.body;
+      const { userId } = req;
+      const data = await ServiceRequestService.clientCancel(
+        req,
+        service_id,
+        userId
+      );
+      return res.json(data);
+    } catch (error) {
+      console.log("========================================");
+      console.log(error);
+      console.log("========================================");
       return res.status(500).json({ error: "Erro ao cancelar chamado" });
     }
   }

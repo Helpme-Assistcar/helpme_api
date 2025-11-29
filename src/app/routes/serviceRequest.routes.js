@@ -22,6 +22,11 @@ routes.put(
   authMiddleware.isAuthenticated,
   ServiceRequestController.cancel
 );
+routes.put(
+  "/client/cancel",
+  authMiddleware.isAuthenticated,
+  ServiceRequestController.clientCancel
+);
 
 routes.get(
   "/:id",
