@@ -14,8 +14,9 @@ class ClientController {
   }
 
   async findAllProviders(req, res) {
+    const { service_provided } = req.params;
     try {
-      const data = await ClientService.findAllProviders();
+      const data = await ClientService.findAllProviders(service_provided);
       return res.json(data);
     } catch (error) {
       return res

@@ -68,6 +68,17 @@ class ProviderService {
 
     return service;
   }
+
+  async updateLocation(userId, location) {
+    const provider = await ProviderProfile.findOne({
+      where: { user_id: userId },
+      attributes: ["id", "status"],
+    });
+
+    if (!provider) throw new AppError(403, "Profissional não encontrado");
+
+    await provider.update({ location });
+  }
 }
 
 module.exports = new ProviderService();

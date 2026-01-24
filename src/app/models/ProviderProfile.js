@@ -53,6 +53,10 @@ class ProviderProfile extends Model {
           defaultValue: 0,
           validate: { min: 0 },
         },
+        location: {
+          type: Sequelize.STRING,
+          allowNull: true,
+        },
       },
       {
         sequelize,
@@ -62,7 +66,7 @@ class ProviderProfile extends Model {
         timestamps: true,
         created_at: "created_at",
         updated_at: "updated_at",
-      }
+      },
     );
     return this;
   }

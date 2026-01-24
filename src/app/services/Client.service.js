@@ -21,7 +21,15 @@ class ClientService {
     return user;
   }
 
-  async findAllProviders() {
+  async findAllProviders(serviceProvided) {
+    const providerWhere = {
+      status: "ONLINE",
+    };
+
+    if (serviceProvided !== "all") {
+      providerWhere.service_provided = serviceProvided;
+    }
+
     const users = await Users.findAll({
       attributes: ["id", "name", "photo", "email", "phone"],
       include: [
@@ -30,7 +38,7 @@ class ClientService {
           as: "providerProfile",
           required: true,
           attributes: ["id", "service_provided", "status", "avg_rating"],
-          where: { status: "ONLINE" },
+          where: providerWhere,
         },
       ],
     });

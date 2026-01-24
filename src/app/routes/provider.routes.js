@@ -8,17 +8,22 @@ const authMiddleware = require("../middlewares/MiddlewareAuth");
 routes.get(
   "/",
   authMiddleware.isAuthenticated,
-  ProviderController.findProvider
+  ProviderController.findProvider,
 );
 routes.put(
   "/status",
   authMiddleware.isAuthenticated,
-  ProviderController.changeStatus
+  ProviderController.changeStatus,
 );
 routes.get(
   "/client/:id",
   authMiddleware.isAuthenticated,
-  ProviderController.findClientService
+  ProviderController.findClientService,
+);
+routes.put(
+  "/location",
+  authMiddleware.isAuthenticated,
+  ProviderController.updateLocation,
 );
 
 module.exports = routes;

@@ -38,6 +38,20 @@ class ProviderController {
         .json({ message: error.message });
     }
   }
+
+  async updateLocation(req, res) {
+    try {
+      const userId = req.userId;
+      const { location } = req.body;
+
+      const data = await ProviderService.updateLocation(userId, location);
+      return res.json(data);
+    } catch (error) {
+      return res
+        .status(error.statusCode || 500)
+        .json({ message: error.message });
+    }
+  }
 }
 
 module.exports = new ProviderController();

@@ -8,7 +8,7 @@ const authMiddleware = require("../middlewares/MiddlewareAuth");
 routes.get("/", authMiddleware.isAuthenticated, ClientController.findClient);
 
 routes.get(
-  "/all",
+  "/all/:service_provided",
   authMiddleware.isAuthenticated,
   ClientController.findAllProviders
 );
