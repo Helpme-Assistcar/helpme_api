@@ -53,8 +53,18 @@ class ProviderProfile extends Model {
           defaultValue: 0,
           validate: { min: 0 },
         },
+        latitude: {
+          type: Sequelize.DOUBLE,
+          allowNull: true,
+        },
+
+        longitude: {
+          type: Sequelize.DOUBLE,
+          allowNull: true,
+        },
+
         location: {
-          type: Sequelize.STRING,
+          type: Sequelize.GEOGRAPHY("POINT", 4326),
           allowNull: true,
         },
       },

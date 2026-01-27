@@ -1,3 +1,4 @@
+const { literal } = require("sequelize");
 const AppError = require("../errors/AppError");
 
 const {
@@ -69,15 +70,19 @@ class ProviderService {
     return service;
   }
 
-  async updateLocation(userId, location) {
-    const provider = await ProviderProfile.findOne({
-      where: { user_id: userId },
-      attributes: ["id", "status"],
-    });
-
-    if (!provider) throw new AppError(403, "Profissional não encontrado");
-
-    await provider.update({ location });
+  async updateLocation(userId, latitude, longitude) {
+    await ProviderProfile.update(
+      {
+        latitude,
+        longitude,
+        location: literal(
+          `ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)::geography`,
+        ),
+      },
+      {
+        where: { user_id: userId },
+      },
+    );
   }
 }
 
