@@ -17,22 +17,10 @@ class ProviderController {
     try {
       const userId = req.userId;
       const { status } = req.body;
-      console.log("========================================");
-      console.log("userId");
-      console.log(userId);
-      console.log(status);
-      console.log("========================================");
 
       const data = await ProviderService.changeStatus(userId, status);
-      console.log("========================================");
-      console.log("Finalizou o changeStatus");
-      console.log("========================================");
       return res.json(data);
     } catch (error) {
-      console.log("========================================");
-      console.log("error changeStatus");
-      console.log(error);
-      console.log("========================================");
       return res
         .status(error.statusCode || 500)
         .json({ message: error.message });
