@@ -16,7 +16,7 @@ class AuthService {
     const refreshToken = TokenManager.generate(
       userId,
       process.env.CLIENT_SECRET_KEY,
-      "15d"
+      "15d",
     );
     const accessToken = TokenManager.generate(userId, refreshToken, "7h");
     await RefreshTokenService.saveTokens(userId, accessToken, refreshToken);
@@ -52,7 +52,7 @@ class AuthService {
           password_hash: bcrypt.hashSync(password, 8),
           photo,
         },
-        { transaction: t }
+        { transaction: t },
       );
 
       await ClientProfile.create({ user_id: user.id }, { transaction: t });
@@ -73,7 +73,7 @@ class AuthService {
       await t.rollback();
       throw new AppError(
         err.statusCode || 500,
-        err.message || "Erro ao registrar cliente"
+        err.message || "Erro ao registrar cliente",
       );
     }
   }
@@ -107,7 +107,7 @@ class AuthService {
           password_hash: bcrypt.hashSync(password, 8),
           photo,
         },
-        { transaction: t }
+        { transaction: t },
       );
 
       const provider = await ProviderProfile.create(
@@ -115,8 +115,9 @@ class AuthService {
           user_id: user.id,
           service_provided: service_provided,
           status: "OFFLINE",
+          registered: true,
         },
-        { transaction: t }
+        { transaction: t },
       );
 
       await t.commit();
@@ -136,13 +137,10 @@ class AuthService {
         ...tokens,
       };
     } catch (err) {
-      console.log("========================================");
-      console.log(err);
-      console.log("========================================");
       await t.rollback();
       throw new AppError(
         err.statusCode || 500,
-        err.message || "Erro ao registrar prestador"
+        err.message || "Erro ao registrar prestador",
       );
     }
   }
@@ -186,7 +184,7 @@ class AuthService {
     if (!providerProfile)
       throw new AppError(
         403,
-        "Conta de prestador não encontrada para este e-mail"
+        "Conta de prestador não encontrada para este e-mail",
       );
 
     const ok = await bcrypt.compare(password, user.password_hash);

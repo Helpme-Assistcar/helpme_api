@@ -41,6 +41,11 @@ class ProviderProfile extends Model {
           allowNull: false,
           defaultValue: "OFFLINE",
         },
+        status: {
+          type: Sequelize.BOOLEAN,
+          allowNull: false,
+          defaultValue: false,
+        },
         avg_rating: {
           type: Sequelize.DECIMAL(3, 2),
           allowNull: false,
