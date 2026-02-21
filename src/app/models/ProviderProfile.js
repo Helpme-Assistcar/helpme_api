@@ -62,15 +62,18 @@ class ProviderProfile extends Model {
           type: Sequelize.DOUBLE,
           allowNull: true,
         },
-
         longitude: {
           type: Sequelize.DOUBLE,
           allowNull: true,
         },
-
         location: {
           type: Sequelize.GEOGRAPHY("POINT", 4326),
           allowNull: true,
+        },
+        registered: {
+          type: Sequelize.BOOLEAN,
+          allowNull: false,
+          defaultValue: false,
         },
       },
       {
