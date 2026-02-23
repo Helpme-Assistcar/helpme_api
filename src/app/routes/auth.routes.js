@@ -9,6 +9,7 @@ const RefreshTokenController = require("../controllers/RefreshToken.controller")
 // Registro
 routes.post("/customer/register", AuthController.registerCustomer);
 routes.post("/provider/register", AuthController.registerProvider);
+routes.post("/register/email", AuthController.emailExist);
 
 // Login
 routes.post("/customer/login", AuthController.customerLogin);
@@ -18,24 +19,24 @@ routes.post("/provider/login", AuthController.providerLogin);
 routes.get(
   "/login/2fa/setup",
   authMiddleware.isAuthenticated,
-  AuthController.setup2FA
+  AuthController.setup2FA,
 );
 routes.post(
   "/login/2fa/verify",
   authMiddleware.isAuthenticated,
-  AuthController.verify2FA
+  AuthController.verify2FA,
 );
 routes.patch(
   "/login/2fa/:id/reset",
   authMiddleware.isAuthenticated,
-  AuthController.reset2FA
+  AuthController.reset2FA,
 );
 
 // Auto-login
 routes.post(
   "/autologin",
   authMiddleware.isAuthenticated,
-  AuthController.autoLogin
+  AuthController.autoLogin,
 );
 routes.post("/google", AuthController.googleLogin);
 

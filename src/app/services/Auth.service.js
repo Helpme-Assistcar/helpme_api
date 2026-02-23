@@ -145,6 +145,27 @@ class AuthService {
     }
   }
 
+  async emailExist({ mail }) {
+    try {
+      const existing = await this.#findUserByMail(mail);
+      if (existing) {
+        return {
+          exists: true,
+        };
+      } else {
+        return {
+          exists: false,
+        };
+      }
+    } catch (err) {
+      await t.rollback();
+      throw new AppError(
+        err.statusCode || 500,
+        err.message || "Erro ao registrar prestador",
+      );
+    }
+  }
+
   // --------- LOGINS ---------
   async customerLogin(mail, password) {
     const invalid = AuthSchemas.loginSchema({ mail, password });

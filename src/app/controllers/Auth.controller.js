@@ -44,6 +44,21 @@ class AuthController {
     }
   }
 
+  async emailExist(req, res) {
+    try {
+      const { mail, email } = req.body;
+
+      const data = await AuthService.emailExist({
+        mail: mail || email,
+      });
+      return res.status(201).json(data);
+    } catch (error) {
+      return res
+        .status(error.statusCode || 500)
+        .json({ message: error.message });
+    }
+  }
+
   // --------- LOGINS ---------
   async customerLogin(req, res) {
     try {
