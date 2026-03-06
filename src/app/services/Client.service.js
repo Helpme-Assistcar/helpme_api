@@ -83,6 +83,62 @@ class ClientService {
 
     return users || [];
   }
+
+  async updateUser(id, photo, name, email, password, phone) {
+    const transaction = await Users.sequelize.transaction();
+
+    try {
+      const user = await Users.findByPk(id, {
+        attributes: { exclude: ["password"] },
+        transaction,
+      });
+
+      if (!user) throw new AppError(404, "Usuário não encontrado.");
+
+      let profilePhoto = user.photo;
+      // if (photo && typeof photo === "string") {
+      //   const isFirebasePhoto = photo.includes(
+      //     "firebasestorage.googleapis.com",
+      //   );
+      //   if (!isFirebasePhoto) {
+      //     const resizedImage = await ImageManager.resizeImage(photo);
+
+      //     profilePhoto = await FirebaseManager.sendFileToFirebase(
+      //       "example-url",
+      //       resizedImage,
+      //       "image/jpeg",
+      //     );
+      //   }
+      // }
+
+      let passwordUpdate = undefined;
+
+      if (password?.length) passwordUpdate = password;
+
+      await user.update(
+        {
+          photo: profilePhoto,
+          email,
+          name,
+          password: passwordUpdate,
+          phone,
+        },
+        { transaction },
+      );
+
+      // Confirma a transação
+      await transaction.commit();
+
+      return user;
+    } catch (error) {
+      console.error(error);
+      await transaction.rollback();
+      throw new AppError(
+        error.statusCode || 500,
+        error.message || "Erro ao atualizar o usuário.",
+      );
+    }
+  }
 }
 
 module.exports = new ClientService();

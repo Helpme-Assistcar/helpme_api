@@ -10,7 +10,9 @@ routes.get("/", authMiddleware.isAuthenticated, ClientController.findClient);
 routes.get(
   "/all/:service_provided",
   authMiddleware.isAuthenticated,
-  ClientController.findAllProviders
+  ClientController.findAllProviders,
 );
+
+routes.patch("", authMiddleware.isAuthenticated, ClientController.updateUser);
 
 module.exports = routes;

@@ -25,5 +25,6 @@ routes.put(
   authMiddleware.isAuthenticated,
   ProviderController.updateLocation,
 );
+routes.patch("", authMiddleware.isAuthenticated, ProviderController.updateUser);
 
 module.exports = routes;

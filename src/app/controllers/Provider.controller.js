@@ -51,9 +51,29 @@ class ProviderController {
       );
       return res.json(data);
     } catch (error) {
-      console.log("========================================");
-      console.log(error);
-      console.log("========================================");
+      return res
+        .status(error.statusCode || 500)
+        .json({ message: error.message });
+    }
+  }
+
+  async updateUser(req, res) {
+    try {
+      const { userId } = req;
+
+      const { photo, name, email, password, phone } = req.body;
+
+      await ProviderService.updateUser(
+        userId,
+        photo,
+        name,
+        email,
+        password,
+        phone,
+      );
+
+      return res.status(200).json({ message: "Usuário atualizado." });
+    } catch (error) {
       return res
         .status(error.statusCode || 500)
         .json({ message: error.message });
