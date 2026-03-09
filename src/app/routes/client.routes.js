@@ -15,4 +15,6 @@ routes.get(
 
 routes.patch("", authMiddleware.isAuthenticated, ClientController.updateUser);
 
+routes.delete("", authMiddleware.isAuthenticated, ClientController.deleteUser);
+
 module.exports = routes;

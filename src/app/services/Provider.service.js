@@ -140,6 +140,29 @@ class ProviderService {
       );
     }
   }
+
+  async deleteUser(id) {
+    const transaction = await Users.sequelize.transaction();
+
+    try {
+      const user = await Users.findByPk(id, { transaction });
+
+      if (!user) throw new AppError(404, "Usuário não encontrado.");
+
+      await user.update({ deleted_at: new Date() }, { transaction });
+
+      await transaction.commit();
+
+      return { message: "Usuário desativado com sucesso." };
+    } catch (error) {
+      await transaction.rollback();
+
+      throw new AppError(
+        error.statusCode || 500,
+        error.message || "Erro ao deletar o usuário.",
+      );
+    }
+  }
 }
 
 module.exports = new ProviderService();

@@ -75,6 +75,10 @@ class Users extends Model {
           allowNull: false,
           defaultValue: false,
         },
+        deleted_at: {
+          type: Sequelize.DATE,
+          allowNull: true,
+        },
       },
       {
         sequelize,
@@ -82,7 +86,7 @@ class Users extends Model {
         timestamps: true,
         modelName: "Users",
         freezeTableName: true,
-      }
+      },
     );
 
     this.addHook("beforeSave", async (user) => {

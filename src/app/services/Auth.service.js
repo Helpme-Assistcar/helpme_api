@@ -8,7 +8,7 @@ const TokenManager = require("../../utils/Token.manager");
 const RefreshTokenService = require("./RefreshToken.service");
 const AuthInteractor = require("../interactors/AuthInteractor");
 
-const { Sequelize } = require("sequelize");
+const { Sequelize, Op } = require("sequelize");
 
 class AuthService {
   // --------- helpers ---------
@@ -25,6 +25,16 @@ class AuthService {
 
   async #findUserByMail(mailOrEmail) {
     return Users.findOne({ where: { email: mailOrEmail } });
+  }
+
+  async findDeletedUser(mailOrEmail) {
+    return Users.findOne({
+      where: {
+        email: mailOrEmail,
+        deleted_at: { [Op.ne]: null },
+      },
+      paranoid: false,
+    });
   }
 
   // --------- REGISTROS ---------
@@ -173,6 +183,9 @@ class AuthService {
 
     const user = await this.#findUserByMail(mail);
     if (!user) throw new AppError(403, "Credenciais inválidas");
+
+    const deleted = await this.findDeletedUser(mail);
+    if (deleted) throw new AppError(403, "Usuário desativado");
 
     const providerProfile = await ProviderProfile.findOne({
       where: { user_id: user.id },

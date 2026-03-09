@@ -58,6 +58,23 @@ class ClientController {
         .json({ message: error.message });
     }
   }
+
+  async deleteUser(req, res) {
+    try {
+      const { userId } = req;
+
+      await ClientService.deleteUser(userId);
+
+      return res.status(200).json({ message: "Usuário deletado." });
+    } catch (error) {
+      console.log("========================================");
+      console.log(error);
+      console.log("========================================");
+      return res
+        .status(error.statusCode || 500)
+        .json({ message: error.message });
+    }
+  }
 }
 
 module.exports = new ClientController();

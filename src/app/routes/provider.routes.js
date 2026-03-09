@@ -27,4 +27,10 @@ routes.put(
 );
 routes.patch("", authMiddleware.isAuthenticated, ProviderController.updateUser);
 
+routes.delete(
+  "",
+  authMiddleware.isAuthenticated,
+  ProviderController.deleteUser,
+);
+
 module.exports = routes;
