@@ -77,13 +77,10 @@ class ServiceRequestController {
       const data = await ServiceRequestService.clientCancel(
         req,
         service_id,
-        userId
+        userId,
       );
       return res.json(data);
     } catch (error) {
-      console.log("========================================");
-      console.log(error);
-      console.log("========================================");
       return res.status(500).json({ error: "Erro ao cancelar chamado" });
     }
   }
@@ -95,6 +92,30 @@ class ServiceRequestController {
       return res.json(data);
     } catch (error) {
       return res.status(500).json({ error: "Erro ao buscar chamado" });
+    }
+  }
+
+  async findAllProviderServices(req, res) {
+    try {
+      const { userId } = req;
+      const data = await ServiceRequestService.findAllProviderServices(userId);
+      return res.json(data);
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ error: "Erro ao buscar serviços do profissional" });
+    }
+  }
+  async findAllCustomerServices(req, res) {
+    try {
+      const { userId } = req;
+
+      const data = await ServiceRequestService.findAllCustomerServices(userId);
+      return res.json(data);
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ error: "Erro ao buscar serviços do cliente" });
     }
   }
 }

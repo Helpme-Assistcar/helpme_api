@@ -25,7 +25,7 @@ class ServiceRequestService {
         serviceRequestId: serviceRequest.id,
       });
       console.log(
-        `📢 Serviço do cliente: ${serviceRequest?.client_id} foi aceito.`
+        `📢 Serviço do cliente: ${serviceRequest?.client_id} foi aceito.`,
       );
     }
 
@@ -51,7 +51,7 @@ class ServiceRequestService {
         serviceRequestId: serviceRequest.id,
       });
       console.log(
-        `📢 Serviço do cliente: ${serviceRequest?.client_id} foi recusado.`
+        `📢 Serviço do cliente: ${serviceRequest?.client_id} foi recusado.`,
       );
     }
 
@@ -69,7 +69,7 @@ class ServiceRequestService {
 
     // 3. Envia o evento em tempo real pro profissional
     const targetSocket = connectedProfessionals.get(
-      serviceRequest?.provider_id
+      serviceRequest?.provider_id,
     );
 
     if (targetSocket) {
@@ -79,7 +79,7 @@ class ServiceRequestService {
         serviceRequestId: serviceRequest.id,
       });
       console.log(
-        `📢 Serviço do cliente: ${serviceRequest?.client_id} foi recusado.`
+        `📢 Serviço do cliente: ${serviceRequest?.client_id} foi recusado.`,
       );
     }
 
@@ -116,6 +116,62 @@ class ServiceRequestService {
     if (!serviceRequest) throw new AppError(403, "Serviço não encontrado");
 
     return serviceRequest;
+  }
+
+  async findAllProviderServices(userId) {
+    const provider = await ProviderProfile.findOne({
+      where: { user_id: userId },
+      attributes: ["id"],
+    });
+
+    if (!provider) throw new AppError(403, "Profissional não encontrado");
+
+    const services = await ServiceRequest.findAll({
+      where: { provider_id: provider.id },
+      include: [
+        {
+          model: ClientProfile,
+          as: "client",
+          include: [
+            {
+              model: Users,
+              as: "user",
+            },
+          ],
+        },
+      ],
+    });
+    if (!services) throw new AppError(403, "Serviços não encontrados");
+
+    return services;
+  }
+
+  async findAllCustomerServices(userId) {
+    const client = await ClientProfile.findOne({
+      where: { user_id: userId },
+      attributes: ["user_id"],
+    });
+
+    if (!client) throw new AppError(403, "Cliente não encontrado");
+
+    const services = await ServiceRequest.findAll({
+      where: { client_id: client.user_id },
+      include: [
+        {
+          model: ProviderProfile,
+          as: "provider",
+          include: [
+            {
+              model: Users,
+              as: "user",
+            },
+          ],
+        },
+      ],
+    });
+    if (!services) throw new AppError(403, "Serviços não encontrados");
+
+    return services;
   }
 }
 

@@ -8,30 +8,42 @@ const authMiddleware = require("../middlewares/MiddlewareAuth");
 routes.post(
   "/",
   authMiddleware.isAuthenticated,
-  ServiceRequestController.create
+  ServiceRequestController.create,
 );
 
 routes.put(
   "/accept",
   authMiddleware.isAuthenticated,
-  ServiceRequestController.accept
+  ServiceRequestController.accept,
 );
 
 routes.put(
   "/cancel",
   authMiddleware.isAuthenticated,
-  ServiceRequestController.cancel
+  ServiceRequestController.cancel,
 );
 routes.put(
   "/client/cancel",
   authMiddleware.isAuthenticated,
-  ServiceRequestController.clientCancel
+  ServiceRequestController.clientCancel,
 );
 
 routes.get(
   "/:id",
   authMiddleware.isAuthenticated,
-  ServiceRequestController.findReq
+  ServiceRequestController.findReq,
+);
+
+routes.get(
+  "/all/provider",
+  authMiddleware.isAuthenticated,
+  ServiceRequestController.findAllProviderServices,
+);
+
+routes.get(
+  "/all/customer",
+  authMiddleware.isAuthenticated,
+  ServiceRequestController.findAllCustomerServices,
 );
 
 module.exports = routes;
