@@ -70,6 +70,21 @@ class ServiceRequestController {
     }
   }
 
+  async completed(req, res) {
+    try {
+      const { service_id } = req.body;
+      const { userId } = req;
+      const data = await ServiceRequestService.completed(
+        req,
+        service_id,
+        userId,
+      );
+      return res.json(data);
+    } catch (error) {
+      return res.status(500).json({ error: "Erro ao cancelar chamado" });
+    }
+  }
+
   async clientCancel(req, res) {
     try {
       const { service_id } = req.body;

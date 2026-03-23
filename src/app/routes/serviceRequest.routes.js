@@ -22,6 +22,13 @@ routes.put(
   authMiddleware.isAuthenticated,
   ServiceRequestController.cancel,
 );
+
+routes.put(
+  "/completed",
+  authMiddleware.isAuthenticated,
+  ServiceRequestController.completed,
+);
+
 routes.put(
   "/client/cancel",
   authMiddleware.isAuthenticated,

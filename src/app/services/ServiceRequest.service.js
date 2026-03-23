@@ -29,7 +29,11 @@ class ServiceRequestService {
       );
     }
 
-    serviceRequest.update({ accepted_at: new Date() });
+    serviceRequest.update({
+      accepted_at: new Date(),
+      started_at: new Date(),
+      status: "ACCEPTED",
+    });
 
     return serviceRequest;
   }
@@ -55,7 +59,38 @@ class ServiceRequestService {
       );
     }
 
-    serviceRequest.update({ cancelled_at: new Date(), cancelled_by: user_id });
+    serviceRequest.update({
+      cancelled_at: new Date(),
+      cancelled_by: user_id,
+      status: "CANCELLED_PROVIDER",
+    });
+
+    return serviceRequest;
+  }
+
+  async completed(req, service_id, user_id) {
+    const serviceRequest = await ServiceRequest.findByPk(service_id);
+    if (!serviceRequest) throw new AppError(403, "Serviço não encontrado");
+
+    const io = req.app.get("io");
+    const connectedCustomer = req.app.get("connectedCustomers");
+
+    // 3. Envia o evento em tempo real pro profissional
+    const targetSocket = connectedCustomer.get(serviceRequest?.client_id);
+
+    if (targetSocket) {
+      io.to(targetSocket).emit("new_call_customer", {
+        accepted: false,
+        completed: true,
+        customerId: serviceRequest?.client_id,
+        serviceRequestId: serviceRequest.id,
+      });
+      console.log(
+        `📢 Serviço do cliente: ${serviceRequest?.client_id} foi concluido.`,
+      );
+    }
+
+    serviceRequest.update({ completed_at: new Date(), status: "DONE" });
 
     return serviceRequest;
   }
@@ -83,7 +118,11 @@ class ServiceRequestService {
       );
     }
 
-    serviceRequest.update({ cancelled_at: new Date(), cancelled_by: user_id });
+    serviceRequest.update({
+      cancelled_at: new Date(),
+      cancelled_by: user_id,
+      status: "CANCELLED_CLIENT",
+    });
 
     return serviceRequest;
   }
