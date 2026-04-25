@@ -39,9 +39,6 @@ class AuthService {
 
   // --------- REGISTROS ---------
   async registerCustomer({ name, mail, password, phone, photo }) {
-    console.log("========================================");
-    console.log("Teste");
-    console.log("========================================");
     const invalid = AuthSchemas.registerCustomerSchema({
       name,
       mail,
