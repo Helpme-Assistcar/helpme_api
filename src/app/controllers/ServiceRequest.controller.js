@@ -1,4 +1,5 @@
-const { ServiceRequest } = require("../models");
+const { ServiceRequest, ProviderProfile } = require("../models");
+const { findByPk } = require("../models/ClientProfile");
 const ServiceRequestService = require("../services/ServiceRequest.service");
 
 class ServiceRequestController {
@@ -13,6 +14,14 @@ class ServiceRequestController {
     const { userId } = req;
 
     try {
+      const provider = await ProviderProfile.findByPk(professionalId);
+
+      if (provider.status !== "status") {
+        return res
+          .status(409)
+          .json({ error: "Esse profissional não está mais online" });
+      }
+
       // 1. Cria o chamado no banco MySQL via Sequelize
       const serviceRequest = await ServiceRequest.create({
         client_id: userId,
