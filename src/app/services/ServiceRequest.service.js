@@ -19,7 +19,7 @@ class ServiceRequestService {
     const targetSocket = connectedCustomer.get(serviceRequest?.client_id);
 
     if (targetSocket) {
-      io.to(targetSocket).emit("new_call_customer", {
+      io.to(targetSocket).emit("call_accepted", {
         accepted: true,
         customerId: serviceRequest?.client_id,
         serviceRequestId: serviceRequest.id,
@@ -49,7 +49,7 @@ class ServiceRequestService {
     const targetSocket = connectedCustomer.get(serviceRequest?.client_id);
 
     if (targetSocket) {
-      io.to(targetSocket).emit("new_call_customer", {
+      io.to(targetSocket).emit("call_cancelled", {
         accepted: false,
         customerId: serviceRequest?.client_id,
         serviceRequestId: serviceRequest.id,
@@ -79,7 +79,7 @@ class ServiceRequestService {
     const targetSocket = connectedCustomer.get(serviceRequest?.client_id);
 
     if (targetSocket) {
-      io.to(targetSocket).emit("new_call_customer", {
+      io.to(targetSocket).emit("call_ended", {
         accepted: false,
         completed: true,
         customerId: serviceRequest?.client_id,
@@ -108,7 +108,7 @@ class ServiceRequestService {
     );
 
     if (targetSocket) {
-      io.to(targetSocket).emit("new_call", {
+      io.to(targetSocket).emit("call_cancelled", {
         accepted: false,
         professionalId: serviceRequest?.provider_id,
         serviceRequestId: serviceRequest.id,

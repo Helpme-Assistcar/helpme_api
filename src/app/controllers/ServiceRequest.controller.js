@@ -16,7 +16,7 @@ class ServiceRequestController {
     try {
       const provider = await ProviderProfile.findByPk(professionalId);
 
-      if (provider.status !== "status") {
+      if (provider.status !== "ONLINE") {
         return res
           .status(409)
           .json({ error: "Esse profissional não está mais online" });
