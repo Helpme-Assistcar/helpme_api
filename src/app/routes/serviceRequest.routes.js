@@ -4,6 +4,7 @@ const routes = Router();
 
 const ServiceRequestController = require("../controllers/ServiceRequest.controller");
 const authMiddleware = require("../middlewares/MiddlewareAuth");
+const signatureMiddleware = require("../middlewares/MiddlewareSignature");
 
 routes.post(
   "/",
@@ -14,6 +15,7 @@ routes.post(
 routes.put(
   "/accept",
   authMiddleware.isAuthenticated,
+  signatureMiddleware.signatueIsActive,
   ServiceRequestController.accept,
 );
 

@@ -4,6 +4,7 @@ const routes = Router();
 
 const ProviderController = require("../controllers/Provider.controller");
 const authMiddleware = require("../middlewares/MiddlewareAuth");
+const signatureMiddleware = require("../middlewares/MiddlewareSignature");
 
 routes.get(
   "/",
@@ -31,6 +32,12 @@ routes.delete(
   "",
   authMiddleware.isAuthenticated,
   ProviderController.deleteUser,
+);
+
+routes.patch(
+  "/plan-inactive",
+  authMiddleware.isAuthenticated,
+  ProviderController.updatePlanInactive,
 );
 
 module.exports = routes;

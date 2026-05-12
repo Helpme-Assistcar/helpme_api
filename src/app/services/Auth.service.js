@@ -123,6 +123,8 @@ class AuthService {
           service_provided: service_provided,
           status: "OFFLINE",
           registered: true,
+          plan_active: true,
+          last_payment: new Date(),
         },
         { transaction: t },
       );

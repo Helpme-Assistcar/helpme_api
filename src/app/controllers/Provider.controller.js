@@ -93,6 +93,20 @@ class ProviderController {
         .json({ message: error.message });
     }
   }
+
+  async updatePlanInactive(req, res) {
+    try {
+      const { userId } = req;
+
+      await ProviderService.updatePlanInactive(userId);
+
+      return res.status(200).json({ message: "Usuário atualizado." });
+    } catch (error) {
+      return res
+        .status(error.statusCode || 500)
+        .json({ message: error.message });
+    }
+  }
 }
 
 module.exports = new ProviderController();

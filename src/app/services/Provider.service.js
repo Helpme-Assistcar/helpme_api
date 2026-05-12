@@ -18,7 +18,13 @@ class ProviderService {
           model: ProviderProfile,
           as: "providerProfile",
           required: true,
-          attributes: ["id", "service_provided", "status", "avg_rating"],
+          attributes: [
+            "id",
+            "service_provided",
+            "status",
+            "avg_rating",
+            "plan_active",
+          ],
         },
       ],
     });
@@ -160,6 +166,38 @@ class ProviderService {
       throw new AppError(
         error.statusCode || 500,
         error.message || "Erro ao deletar o usuário.",
+      );
+    }
+  }
+
+  async updatePlanInactive(id) {
+    const transaction = await ProviderProfile.sequelize.transaction();
+
+    try {
+      const user = await ProviderProfile.findOne({
+        where: { user_id: id },
+        attributes: { exclude: ["user_id", "plan_active"] },
+        transaction,
+      });
+
+      if (!user) throw new AppError(404, "Usuário não encontrado.");
+
+      if (user.plan_active) {
+        await user.update(
+          {
+            plan_active: false,
+          },
+          { transaction },
+        );
+      }
+      await transaction.commit();
+      return;
+    } catch (error) {
+      console.error(error);
+      await transaction.rollback();
+      throw new AppError(
+        error.statusCode || 500,
+        error.message || "Erro ao atualizar o plano do usuário.",
       );
     }
   }

@@ -52,6 +52,15 @@ module.exports = {
         allowNull: false,
         defaultValue: false,
       },
+      plan_active: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
+      last_payment: {
+        type: Sequelize.DATE,
+        allowNull: false,
+      },
       created_at: {
         type: Sequelize.DATE,
         allowNull: false,

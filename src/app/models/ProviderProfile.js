@@ -75,6 +75,15 @@ class ProviderProfile extends Model {
           allowNull: false,
           defaultValue: false,
         },
+        plan_active: {
+          type: Sequelize.BOOLEAN,
+          allowNull: false,
+          defaultValue: false,
+        },
+        last_payment: {
+          type: Sequelize.DATE,
+          allowNull: false,
+        },
       },
       {
         sequelize,
