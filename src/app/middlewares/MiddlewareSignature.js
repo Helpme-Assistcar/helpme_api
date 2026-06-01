@@ -8,7 +8,7 @@ class MiddlewareSignature {
 
       const user = await ProviderProfile.findOne({
         where: { user_id: id },
-        attributes: { exclude: ["user_id", "plan_active"] },
+        attributes: ["user_id", "plan_active"],
       });
 
       if (!user) throw new AppError(404, "Usuário não encontrado.");
