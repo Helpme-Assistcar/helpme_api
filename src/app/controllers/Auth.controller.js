@@ -25,8 +25,17 @@ class AuthController {
 
   async registerProvider(req, res) {
     try {
-      const { name, mail, email, password, phone, service_provided, photo } =
-        req.body;
+      const {
+        name,
+        mail,
+        email,
+        password,
+        phone,
+        service_provided,
+        photo,
+        affiliate_code,
+        revenuecat_app_user_id,
+      } = req.body;
 
       const data = await AuthService.registerProvider({
         name,
@@ -35,6 +44,8 @@ class AuthController {
         phone,
         service_provided,
         photo,
+        affiliate_code,
+        revenuecat_app_user_id,
       });
       return res.status(201).json(data);
     } catch (error) {

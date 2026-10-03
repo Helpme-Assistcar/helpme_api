@@ -13,7 +13,7 @@ class ClientService {
           model: ClientProfile,
           as: "clientProfile",
           required: true,
-          attributes: ["user_id"],
+          attributes: ["user_id", "affiliate_code"],
         },
       ],
     });

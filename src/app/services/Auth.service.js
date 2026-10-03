@@ -3,12 +3,15 @@ const bcrypt = require("bcryptjs");
 const AppError = require("../errors/AppError");
 const AuthSchemas = require("../schemas/Auth.schemas");
 
-const { Users, ClientProfile, ProviderProfile } = require("../models");
+const { Users, ClientProfile, ProviderProfile, ProviderReferral } = require("../models");
 const TokenManager = require("../../utils/Token.manager");
 const RefreshTokenService = require("./RefreshToken.service");
+const RevenueCatService = require("./RevenueCat.service");
 const AuthInteractor = require("../interactors/AuthInteractor");
 
 const { Sequelize, Op } = require("sequelize");
+
+const REFERRAL_AMOUNT = 39.9;
 
 class AuthService {
   // --------- helpers ---------
@@ -25,6 +28,22 @@ class AuthService {
 
   async #findUserByMail(mailOrEmail) {
     return Users.findOne({ where: { email: mailOrEmail } });
+  }
+
+  async #generateAffiliateCode(transaction) {
+    const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // sem 0/O/1/I, evita confusão
+    for (let attempt = 0; attempt < 10; attempt += 1) {
+      let code = "";
+      for (let i = 0; i < 8; i += 1) {
+        code += alphabet[Math.floor(Math.random() * alphabet.length)];
+      }
+      const exists = await ClientProfile.findOne({
+        where: { affiliate_code: code },
+        transaction,
+      });
+      if (!exists) return code;
+    }
+    throw new AppError(500, "Não foi possível gerar um código de indicação");
   }
 
   async findDeletedUser(mailOrEmail) {
@@ -62,7 +81,11 @@ class AuthService {
         { transaction: t },
       );
 
-      await ClientProfile.create({ user_id: user.id }, { transaction: t });
+      const affiliateCode = await this.#generateAffiliateCode(t);
+      await ClientProfile.create(
+        { user_id: user.id, affiliate_code: affiliateCode },
+        { transaction: t },
+      );
 
       await t.commit();
 
@@ -92,6 +115,8 @@ class AuthService {
     phone,
     service_provided,
     photo,
+    affiliate_code,
+    revenuecat_app_user_id,
   }) {
     const invalid = AuthSchemas.registerProviderSchema({
       name,
@@ -100,11 +125,34 @@ class AuthService {
     });
     if (invalid) throw new AppError(400, invalid);
 
+    // O profissional paga ANTES de a conta existir (compra feita com um ID
+    // anônimo do RevenueCat). Confirmamos o pagamento no servidor, fora da
+    // transação para não segurar conexão do banco durante a chamada externa.
+    let payment = { active: false, isTrial: false };
+    if (revenuecat_app_user_id) {
+      if (!String(revenuecat_app_user_id).startsWith("$RCAnonymousID:")) {
+        throw new AppError(400, "Identificador de pagamento inválido");
+      }
+      payment = await RevenueCatService.getEntitlementStatus(
+        revenuecat_app_user_id,
+      );
+    }
+
     const t = await Users.sequelize.transaction();
 
     try {
       const existing = await this.#findUserByMail(mail);
       if (existing) throw new AppError(409, "E-mail já cadastrado");
+
+      if (revenuecat_app_user_id) {
+        const alreadyUsed = await ProviderProfile.findOne({
+          where: { revenuecat_app_user_id },
+          transaction: t,
+        });
+        if (alreadyUsed) {
+          throw new AppError(409, "Este pagamento já foi usado em outra conta");
+        }
+      }
 
       const user = await Users.create(
         {
@@ -117,17 +165,44 @@ class AuthService {
         { transaction: t },
       );
 
+      // plan_active só fica true se o RevenueCat confirmou o pagamento.
       const provider = await ProviderProfile.create(
         {
           user_id: user.id,
           service_provided: service_provided,
           status: "OFFLINE",
           registered: true,
-          plan_active: true,
-          last_payment: new Date(),
+          plan_active: payment.active,
+          last_payment: payment.active ? new Date() : null,
+          revenuecat_app_user_id: revenuecat_app_user_id || null,
         },
         { transaction: t },
       );
+
+      if (affiliate_code) {
+        const referrer = await ClientProfile.findOne({
+          where: { affiliate_code: affiliate_code.trim().toUpperCase() },
+          transaction: t,
+        });
+
+        // Código inválido/digitado errado não deve travar o cadastro do
+        // profissional — só não gera indicação. Se o pagamento já foi
+        // confirmado (e não é período de teste), a indicação já nasce
+        // CONFIRMED; senão fica PENDING até o webhook confirmar.
+        if (referrer) {
+          const paid = payment.active && !payment.isTrial;
+          await ProviderReferral.create(
+            {
+              client_id: referrer.user_id,
+              provider_id: provider.id,
+              amount: REFERRAL_AMOUNT,
+              status: paid ? "CONFIRMED" : "PENDING",
+              confirmed_at: paid ? new Date() : null,
+            },
+            { transaction: t },
+          );
+        }
+      }
 
       await t.commit();
 
@@ -196,10 +271,10 @@ class AuthService {
     // Clientes: sem 2FA obrigatório
     if (!providerProfile) {
       const tokens = await this.#issueTokens(user.id);
-      return { accessToken: tokens.accessToken, type: "CLIENT" };
+      return { accessToken: tokens.accessToken, type: "CLIENT", id: user.id };
     } else {
       const tokens = await this.#issueTokens(user.id);
-      return { accessToken: tokens.accessToken, type: "PROVIDER" };
+      return { accessToken: tokens.accessToken, type: "PROVIDER", id: user.id };
     }
   }
 
@@ -224,7 +299,7 @@ class AuthService {
     if (!ok) throw new AppError(403, "Credenciais inválidas");
 
     const tokens = await this.#issueTokens(user.id);
-    return { accessToken: tokens.accessToken, type: "PROVIDER" };
+    return { accessToken: tokens.accessToken, type: "PROVIDER", id: user.id };
     // // 2FA (apenas prestador): se existir secret, o token é obrigatório
     // if (user.two_factor_secret) {
     //   if (!token) throw new AppError(400, "Informe o código 2FA");
@@ -317,10 +392,10 @@ class AuthService {
 
     if (!providerProfile) {
       const tokens = await this.#issueTokens(user.id);
-      return { accessToken: tokens.accessToken, type: "CLIENT" };
+      return { accessToken: tokens.accessToken, type: "CLIENT", id: user.id };
     } else {
       const tokens = await this.#issueTokens(user.id);
-      return { accessToken: tokens.accessToken, type: "PROVIDER" };
+      return { accessToken: tokens.accessToken, type: "PROVIDER", id: user.id };
     }
   }
   async googleLogin(email) {
@@ -336,10 +411,10 @@ class AuthService {
 
     if (!providerProfile) {
       const tokens = await this.#issueTokens(user.id);
-      return { accessToken: tokens.accessToken, type: "CLIENT" };
+      return { accessToken: tokens.accessToken, type: "CLIENT", id: user.id };
     } else {
       const tokens = await this.#issueTokens(user.id);
-      return { accessToken: tokens.accessToken, type: "PROVIDER" };
+      return { accessToken: tokens.accessToken, type: "PROVIDER", id: user.id };
     }
   }
 }
