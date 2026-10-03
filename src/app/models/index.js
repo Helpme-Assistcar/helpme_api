@@ -10,6 +10,7 @@ const ProviderDocument = require("./ProviderDocument");
 const ProviderPayment = require("./ProviderPayment");
 const ProviderPresence = require("./ProviderPresence");
 const ProviderProfile = require("./ProviderProfile");
+const ProviderReferral = require("./ProviderReferral");
 const ProviderService = require("./ProviderService");
 const RequestMessage = require("./RequestMessage");
 const Review = require("./Review");
@@ -31,6 +32,7 @@ module.exports = {
   ProviderPayment,
   ProviderPresence,
   ProviderProfile,
+  ProviderReferral,
   ProviderService,
   RequestMessage,
   Review,

@@ -10,6 +10,11 @@ module.exports = {
         onDelete: "CASCADE",
       },
       meta: { type: Sequelize.JSON, allowNull: true },
+      affiliate_code: {
+        type: Sequelize.STRING(20),
+        allowNull: true,
+        unique: true,
+      },
       created_at: {
         type: Sequelize.DATE,
         allowNull: false,

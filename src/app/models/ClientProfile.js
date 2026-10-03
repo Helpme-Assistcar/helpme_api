@@ -15,6 +15,11 @@ class ClientProfile extends Model {
           },
         },
         meta: { type: Sequelize.JSON, allowNull: true },
+        affiliate_code: {
+          type: Sequelize.STRING(20),
+          allowNull: true,
+          unique: true,
+        },
       },
       {
         sequelize,
@@ -43,6 +48,11 @@ class ClientProfile extends Model {
       foreignKey: "client_id",
       sourceKey: "user_id",
       as: "favorites",
+    });
+    this.hasMany(models.ProviderReferral, {
+      foreignKey: "client_id",
+      sourceKey: "user_id",
+      as: "referrals",
     });
   }
 }

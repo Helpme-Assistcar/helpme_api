@@ -57,9 +57,14 @@ module.exports = {
         allowNull: false,
         defaultValue: false,
       },
+      revenuecat_app_user_id: {
+        type: Sequelize.STRING(255),
+        allowNull: true,
+        unique: true, // um pagamento só pode ativar uma conta
+      },
       last_payment: {
         type: Sequelize.DATE,
-        allowNull: false,
+        allowNull: true, // nulo até o pagamento real ser confirmado
       },
       created_at: {
         type: Sequelize.DATE,

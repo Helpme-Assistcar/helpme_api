@@ -41,11 +41,6 @@ class ProviderProfile extends Model {
           allowNull: false,
           defaultValue: "OFFLINE",
         },
-        status: {
-          type: Sequelize.BOOLEAN,
-          allowNull: false,
-          defaultValue: false,
-        },
         avg_rating: {
           type: Sequelize.DECIMAL(3, 2),
           allowNull: false,
@@ -80,9 +75,18 @@ class ProviderProfile extends Model {
           allowNull: false,
           defaultValue: false,
         },
+        revenuecat_app_user_id: {
+          // ID anônimo do RevenueCat com que o pagamento foi feito (a compra
+          // acontece antes da conta existir). Usado para casar webhooks.
+          type: Sequelize.STRING(255),
+          allowNull: true,
+          unique: true,
+        },
         last_payment: {
+          // Fica nulo até o webhook do RevenueCat confirmar o primeiro
+          // pagamento real — plan_active só vira true nesse momento.
           type: Sequelize.DATE,
-          allowNull: false,
+          allowNull: true,
         },
       },
       {
@@ -138,6 +142,10 @@ class ProviderProfile extends Model {
     this.hasMany(models.FavoriteProvider, {
       foreignKey: "provider_id",
       as: "favoritedBy",
+    });
+    this.hasOne(models.ProviderReferral, {
+      foreignKey: "provider_id",
+      as: "referral",
     });
   }
 }
