@@ -64,10 +64,16 @@ class ProviderReferralService {
     return { handled: true, providerId: provider.id };
   }
 
-  // Chamado mensalmente pelo job interno (ReferralPayout.job). Notifica por
-  // e-mail todo cliente com indicações CONFIRMED ainda não notificadas e
-  // marca essas indicações como NOTIFIED — o status é o que impede reenvio.
-  async runMonthlyPayoutCheck() {
+  // Chamado mensalmente pelo job interno (ReferralPayout.job) e pelo comando
+  // manual. Notifica por e-mail todo cliente com indicações CONFIRMED ainda
+  // não notificadas e marca essas indicações como NOTIFIED — o status é o que
+  // impede reenvio.
+  //
+  // Modos:
+  //  - dryRun: não envia nada nem altera o banco, só devolve o que seria feito.
+  //  - redirectTo: envia o e-mail real, mas para este endereço (teste), sem
+  //    marcar nada como NOTIFIED.
+  async runMonthlyPayoutCheck({ dryRun = false, redirectTo = null } = {}) {
     const now = new Date();
 
     const referrals = await ProviderReferral.findAll({
@@ -98,26 +104,44 @@ class ProviderReferralService {
         0,
       );
 
+      const entry = {
+        clientId,
+        name: user.name,
+        email: user.email,
+        referralCount: clientReferrals.length,
+        totalAmount,
+      };
+
+      if (dryRun) {
+        results.push({ ...entry, outcome: "SIMULATED" });
+        continue;
+      }
+
+      let sent = false;
       try {
         await EmailService.sendReferralPayoutEmail({
-          to: user.email,
+          to: redirectTo || user.email,
           clientName: user.name,
           referralCount: clientReferrals.length,
           totalAmount,
+          test: Boolean(redirectTo),
         });
+        sent = true;
 
-        await ProviderReferral.update(
-          { status: "NOTIFIED", notified_at: new Date() },
-          { where: { id: clientReferrals.map((r) => r.id) } },
-        );
+        if (!redirectTo) {
+          await ProviderReferral.update(
+            { status: "NOTIFIED", notified_at: new Date() },
+            { where: { id: clientReferrals.map((r) => r.id) } },
+          );
+        }
 
-        results.push({ clientId, email: user.email, totalAmount, notified: true });
+        results.push({ ...entry, outcome: redirectTo ? "TEST_SENT" : "SENT" });
       } catch (error) {
         results.push({
-          clientId,
-          email: user.email,
-          totalAmount,
-          notified: false,
+          ...entry,
+          // Se o e-mail saiu mas o status não foi gravado, o cliente seria
+          // avisado de novo na próxima execução — por isso é um caso à parte.
+          outcome: sent ? "SENT_NOT_MARKED" : "FAILED",
           error: error.message,
         });
       }
@@ -125,7 +149,7 @@ class ProviderReferralService {
 
     return {
       checkedAt: now,
-      clientsNotified: results.filter((r) => r.notified).length,
+      clientsNotified: results.filter((r) => r.outcome === "SENT").length,
       results,
     };
   }

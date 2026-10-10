@@ -10,7 +10,8 @@
     "seed": "npx sequelize-cli db:seed:all",
     "migrate": "npx sequelize-cli db:migrate",
     "create:migration": "npx sequelize-cli migration:create --name",
-    "create:seeder": "npx sequelize-cli seed:create --name"
+    "create:seeder": "npx sequelize-cli seed:create --name",
+    "referrals:payout": "node src/scripts/referralPayout.js"
   },
   "keywords": [],
   "author": "",

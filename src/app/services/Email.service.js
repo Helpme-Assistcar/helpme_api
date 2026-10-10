@@ -18,7 +18,13 @@ class EmailService {
     return this.#transporter;
   }
 
-  async sendReferralPayoutEmail({ to, clientName, referralCount, totalAmount }) {
+  async sendReferralPayoutEmail({
+    to,
+    clientName,
+    referralCount,
+    totalAmount,
+    test = false,
+  }) {
     const formattedAmount = totalAmount.toLocaleString("pt-BR", {
       style: "currency",
       currency: "BRL",
@@ -27,10 +33,10 @@ class EmailService {
     await this.#getTransporter().sendMail({
       from: process.env.EMAIL_FROM,
       to,
-      subject: "Você tem indicações a receber no Helpme!",
+      subject: `${test ? "[TESTE] " : ""}Você tem indicações a receber no Helpme!`,
       html: `
         <p>Olá, ${clientName}!</p>
-        <p>Você indicou ${referralCount} novo(s) profissional(is) que já pagaram a primeira mensalidade no Helpme este mês. Isso te dá direito a <strong>${formattedAmount}</strong>.</p>
+        <p>Você indicou ${referralCount} novo(s) profissional(is) que já pagaram a primeira mensalidade no Helpme. Isso te dá direito a <strong>${formattedAmount}</strong>.</p>
         <p>Para receber o pagamento, responda este e-mail com os seguintes dados:</p>
         <ul>
           <li>Nome completo</li>
