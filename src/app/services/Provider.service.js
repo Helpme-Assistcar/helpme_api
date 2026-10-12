@@ -170,28 +170,28 @@ class ProviderService {
     }
   }
 
+  // Chamado pelo app quando ele detecta que o plano do profissional acabou.
+  // Desativa o plano e tira o profissional do ar, para ele deixar de ser
+  // listado e de receber chamados.
   async updatePlanInactive(id) {
     const transaction = await ProviderProfile.sequelize.transaction();
 
     try {
-      const user = await ProviderProfile.findOne({
+      const provider = await ProviderProfile.findOne({
         where: { user_id: id },
-        attributes: { exclude: ["user_id", "plan_active"] },
+        attributes: ["id", "plan_active", "status"],
         transaction,
       });
 
-      if (!user) throw new AppError(404, "Usuário não encontrado.");
+      if (!provider) throw new AppError(404, "Usuário não encontrado.");
 
-      if (user.plan_active) {
-        await user.update(
-          {
-            plan_active: false,
-          },
-          { transaction },
-        );
-      }
+      await provider.update(
+        { plan_active: false, status: "OFFLINE" },
+        { transaction },
+      );
+
       await transaction.commit();
-      return;
+      return { plan_active: false, status: "OFFLINE" };
     } catch (error) {
       console.error(error);
       await transaction.rollback();
