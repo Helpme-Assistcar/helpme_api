@@ -1,4 +1,4 @@
-const jwt = require("jsonwebtoken");
+const AppError = require("../errors/AppError");
 const { ProviderProfile } = require("../models");
 
 class MiddlewareSignature {
@@ -14,7 +14,9 @@ class MiddlewareSignature {
       if (!user) throw new AppError(404, "Usuário não encontrado.");
 
       if (!user.plan_active) {
-        return res.status(401).json({ message: "Assinatura expirada" });
+        // 403 (e não 401): 401 é "sessão inválida", e o plano vencido não
+        // deve ser tratado como login expirado.
+        return res.status(403).json({ message: "Assinatura expirada" });
       }
 
       return next();

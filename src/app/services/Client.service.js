@@ -25,6 +25,7 @@ class ClientService {
   async findAllProviders(service_provided, latitude, longitude, radius = 5000) {
     const providerWhere = {
       status: "ONLINE",
+      plan_active: true,
     };
 
     if (service_provided !== "all") {

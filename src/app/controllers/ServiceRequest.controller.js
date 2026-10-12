@@ -16,10 +16,16 @@ class ServiceRequestController {
     try {
       const provider = await ProviderProfile.findByPk(professionalId);
 
-      if (provider.status !== "ONLINE") {
+      if (!provider) {
+        return res.status(404).json({ error: "Profissional não encontrado" });
+      }
+
+      // Sem plano ativo o profissional não pode receber chamados, mesmo que
+      // ainda esteja marcado como ONLINE.
+      if (!provider.plan_active || provider.status !== "ONLINE") {
         return res
           .status(409)
-          .json({ error: "Esse profissional não está mais online" });
+          .json({ error: "Esse profissional não está mais disponível" });
       }
 
       // 1. Cria o chamado no banco MySQL via Sequelize
